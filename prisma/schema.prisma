@@ -1,0 +1,166 @@
+// WorkHub — unified employee & operations management platform
+// SQLite schema for: employees, timesheets, leave, complaints, loans, fleet, reports, sheets
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Employee {
+  id          String   @id @default(cuid())
+  employeeNo  String   @unique
+  name        String
+  email       String   @unique
+  phone       String?
+  position    String
+  department  String
+  hireDate    DateTime
+  salary      Float
+  status      String   @default("active") // active | on-leave | suspended | terminated
+  avatar      String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  timesheets  Timesheet[]
+  leaves      LeaveRequest[]
+  complaints  Complaint[]
+  loans       Loan[]
+  fleetLogs   FleetLog[]
+  reports     WeeklyReport[]  @relation("ReportAuthor")
+}
+
+model Timesheet {
+  id         String   @id @default(cuid())
+  employeeId String
+  date       DateTime
+  clockIn    DateTime
+  clockOut   DateTime?
+  breakMin   Int      @default(30)
+  hours      Float    @default(0)
+  status     String   @default("pending") // pending | approved | rejected
+  notes      String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  employee   Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+}
+
+model LeaveRequest {
+  id         String   @id @default(cuid())
+  employeeId String
+  type       String   // annual | sick | unpaid | maternity | emergency
+  startDate  DateTime
+  endDate    DateTime
+  days       Float
+  reason     String
+  status     String   @default("pending") // pending | approved | rejected
+  reviewedBy String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  employee   Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+}
+
+model Complaint {
+  id          String    @id @default(cuid())
+  employeeId  String
+  title       String
+  description String
+  category    String    // harassment | safety | payment | workload | equipment | other
+  priority    String    @default("medium") // low | medium | high | critical
+  status      String    @default("open") // open | investigating | resolved | dismissed
+  resolution  String?
+  createdAt   DateTime  @default(now())
+  resolvedAt  DateTime?
+
+  employee    Employee  @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+}
+
+model Loan {
+  id              String   @id @default(cuid())
+  employeeId      String
+  principal       Float
+  interestRate    Float    @default(0)
+  termMonths      Int
+  monthlyPayment  Float
+  balance         Float
+  status          String   @default("active") // active | paid | defaulted
+  issuedAt        DateTime @default(now())
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  employee        Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+}
+
+model Vehicle {
+  id          String   @id @default(cuid())
+  plateNumber String   @unique
+  brand       String
+  model       String
+  year        Int
+  type        String   // car | van | truck | motorcycle
+  status      String   @default("active") // active | maintenance | retired
+  assignedTo  String?  // employee name or null for pool
+  mileage     Int      @default(0)
+  fuelLevel   Int      @default(100)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  logs        FleetLog[]
+}
+
+model FleetLog {
+  id           String   @id @default(cuid())
+  vehicleId    String
+  employeeId   String?
+  date         DateTime
+  startOdometer Int
+  endOdometer  Int
+  distance     Int
+  fuelCost     Float    @default(0)
+  purpose      String
+  createdAt    DateTime @default(now())
+
+  vehicle      Vehicle  @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+  employee     Employee? @relation(fields: [employeeId], references: [id])
+}
+
+model WeeklyReport {
+  id                String   @id @default(cuid())
+  weekStart         DateTime
+  weekEnd           DateTime
+  title             String
+  summary           String
+  totalEmployees    Int
+  totalHours        Float
+  complaintsOpen    Int
+  complaintsResolved Int
+  leaveDays         Float
+  fleetTrips        Int
+  fleetDistance     Int
+  loansActive       Int
+  authoredById      String?
+  createdAt         DateTime @default(now())
+
+  authoredBy        Employee? @relation("ReportAuthor", fields: [authoredById], references: [id])
+}
+
+model Sheet {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  columns     String   // JSON-encoded array of {id, name, type}
+  rows        String   // JSON-encoded array of row objects keyed by column id
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Setting {
+  id    String @id @default(cuid())
+  key   String @unique
+  value String
+}

@@ -1,0 +1,50 @@
+{
+  "name": "WorkHub — Manager Dashboard",
+  "short_name": "WorkHub",
+  "description": "Unified manager workspace: employees, hours, leave, complaints, loans, fleet, reports, sheets.",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#0f172a",
+  "theme_color": "#0f172a",
+  "categories": ["business", "productivity", "utilities"],
+  "lang": "en",
+  "dir": "ltr",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Dashboard",
+      "url": "/?section=dashboard",
+      "description": "Open KPI dashboard"
+    },
+    {
+      "name": "Timesheets",
+      "url": "/?section=timesheets",
+      "description": "Clock in/out and hours"
+    },
+    {
+      "name": "Fleet",
+      "url": "/?section=fleet",
+      "description": "Track vehicles and trips"
+    }
+  ]
+}

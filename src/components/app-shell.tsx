@@ -1,0 +1,101 @@
+"use client";
+
+import { Sidebar } from "@/components/sidebar";
+import { MobileNav } from "@/components/mobile-nav";
+import { Topbar } from "@/components/topbar";
+import { useAppStore } from "@/lib/store";
+import { DashboardView } from "@/components/views/dashboard";
+import { EmployeesView } from "@/components/views/employees";
+import { TimesheetsView } from "@/components/views/timesheets";
+import { LeaveView } from "@/components/views/leave";
+import { ComplaintsView } from "@/components/views/complaints";
+import { LoansView } from "@/components/views/loans";
+import { FleetView } from "@/components/views/fleet";
+import { ReportsView } from "@/components/views/reports";
+import { SheetsView } from "@/components/views/sheets";
+import { NAV_ITEMS } from "@/lib/nav";
+import { cn } from "@/lib/utils";
+import { useEffect } from "react";
+
+export function AppShell() {
+  const activeSection = useAppStore((s) => s.activeSection);
+  const setActiveSection = useAppStore((s) => s.setActiveSection);
+
+  // Sync section from URL query param on mount (for PWA shortcuts)
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const params = new URLSearchParams(window.location.search);
+    const section = params.get("section");
+    if (section && NAV_ITEMS.some((n) => n.id === section)) {
+      setActiveSection(section as never);
+    }
+  }, [setActiveSection]);
+
+  return (
+    <div className="min-h-screen flex flex-col bg-background">
+      <div className="flex flex-1 min-h-0">
+        <Sidebar />
+        <MobileNav />
+
+        <div className="flex-1 flex flex-col min-w-0">
+          <Topbar />
+
+          <main className="flex-1 overflow-y-auto p-3 md:p-6">
+            <div className={cn("mx-auto max-w-7xl")}>
+              {activeSection === "dashboard" && <DashboardView />}
+              {activeSection === "employees" && <EmployeesView />}
+              {activeSection === "timesheets" && <TimesheetsView />}
+              {activeSection === "leave" && <LeaveView />}
+              {activeSection === "complaints" && <ComplaintsView />}
+              {activeSection === "loans" && <LoansView />}
+              {activeSection === "fleet" && <FleetView />}
+              {activeSection === "reports" && <ReportsView />}
+              {activeSection === "sheets" && <SheetsView />}
+            </div>
+          </main>
+
+          <footer className="border-t bg-background px-4 py-3 text-xs text-muted-foreground flex flex-col sm:flex-row items-center justify-between gap-1">
+            <span>WorkHub Manager Suite — unified ops dashboard</span>
+            <span className="text-[10px]">Tip: install to home screen for app-like access (PWA)</span>
+          </footer>
+        </div>
+      </div>
+
+      {/* Mobile bottom navigation — quick switcher */}
+      <MobileBottomNav />
+    </div>
+  );
+}
+
+function MobileBottomNav() {
+  const activeSection = useAppStore((s) => s.activeSection);
+  const setActiveSection = useAppStore((s) => s.setActiveSection);
+  // Show only 5 priority items in bottom nav
+  const items = NAV_ITEMS.filter((n) =>
+    ["dashboard", "employees", "timesheets", "fleet", "sheets"].includes(n.id),
+  );
+
+  return (
+    <nav className="md:hidden sticky bottom-0 z-30 border-t bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 safe-bottom">
+      <div className="grid grid-cols-5">
+        {items.map((item) => {
+          const Icon = item.icon;
+          const active = activeSection === item.id;
+          return (
+            <button
+              key={item.id}
+              onClick={() => setActiveSection(item.id)}
+              className={cn(
+                "flex flex-col items-center gap-0.5 py-2 px-1 text-[10px] font-medium transition-colors",
+                active ? "text-primary" : "text-muted-foreground",
+              )}
+            >
+              <Icon className="h-4 w-4" />
+              <span className="truncate max-w-full">{item.short}</span>
+            </button>
+          );
+        })}
+      </div>
+    </nav>
+  );
+}
