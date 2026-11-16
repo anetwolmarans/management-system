@@ -21,13 +21,13 @@ export function Sidebar() {
         collapsed ? "w-16" : "w-64",
       )}
     >
-      <div className="flex items-center h-16 border-b px-4 shrink-0">
+      <div className="flex items-center h-16 border-b border-sidebar-border px-4 shrink-0 bg-sidebar">
         <Link href="/" className="flex items-center gap-2 overflow-hidden">
           <WorkhubLogo className="h-8 w-8 shrink-0" />
           {!collapsed && (
             <div className="flex flex-col leading-tight overflow-hidden">
               <span className="font-bold text-sm tracking-tight">WorkHub</span>
-              <span className="text-[10px] text-muted-foreground">Manager Suite</span>
+              <span className="text-[10px] text-muted-foreground font-medium">Manager Suite</span>
             </div>
           )}
         </Link>

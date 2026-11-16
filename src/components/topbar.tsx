@@ -24,15 +24,18 @@ export function Topbar() {
   const setMobileNavOpen = useAppStore((s) => s.setMobileNavOpen);
   const activeSection = useAppStore((s) => s.activeSection);
   const [notifCount, setNotifCount] = useState(0);
+  const [fleetAlerts, setFleetAlerts] = useState(0);
 
   useEffect(() => {
     Promise.resolve().then(() => setMounted(true));
-    // Fetch dashboard to get notification count (open complaints + pending leave)
+    // Fetch dashboard to get notification counts
     fetch("/api/dashboard")
       .then((r) => r.json())
-      .then((d) =>
-        setNotifCount((d?.kpis?.openComplaints ?? 0) + (d?.kpis?.pendingLeave ?? 0)),
-      )
+      .then((d) => {
+        const k = d?.kpis ?? {};
+        setNotifCount((k.openComplaints ?? 0) + (k.pendingLeave ?? 0) + (k.fleetAlerts ?? 0));
+        setFleetAlerts(k.fleetAlerts ?? 0);
+      })
       .catch(() => {});
   }, []);
 
@@ -134,6 +137,17 @@ export function Topbar() {
           <DropdownMenuItem onClick={() => useAppStore.getState().setActiveSection("timesheets")}>
             Timesheets awaiting approval
           </DropdownMenuItem>
+          {fleetAlerts > 0 && (
+            <>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                className="text-rose-700 dark:text-rose-300 focus:text-rose-700"
+                onClick={() => useAppStore.getState().setActiveSection("fleet")}
+              >
+                Fleet alerts: {fleetAlerts} flagged inspection{fleetAlerts === 1 ? "" : "s"} / overdue service{fleetAlerts === 1 ? "" : "s"}
+              </DropdownMenuItem>
+            </>
+          )}
         </DropdownMenuContent>
       </DropdownMenu>
 

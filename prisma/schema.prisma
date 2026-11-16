@@ -25,12 +25,14 @@ model Employee {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  timesheets  Timesheet[]
-  leaves      LeaveRequest[]
-  complaints  Complaint[]
-  loans       Loan[]
-  fleetLogs   FleetLog[]
-  reports     WeeklyReport[]  @relation("ReportAuthor")
+  timesheets     Timesheet[]
+  leaves         LeaveRequest[]
+  complaints     Complaint[]
+  loans          Loan[]
+  fleetLogs      FleetLog[]
+  inspections    VehicleInspection[]  @relation("InspectionInspector")
+  services       ServiceRecord[]      @relation("ServiceMechanic")
+  reports        WeeklyReport[]       @relation("ReportAuthor")
 }
 
 model Timesheet {
@@ -97,20 +99,33 @@ model Loan {
 }
 
 model Vehicle {
-  id          String   @id @default(cuid())
-  plateNumber String   @unique
-  brand       String
-  model       String
-  year        Int
-  type        String   // car | van | truck | motorcycle
-  status      String   @default("active") // active | maintenance | retired
-  assignedTo  String?  // employee name or null for pool
-  mileage     Int      @default(0)
-  fuelLevel   Int      @default(100)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id                  String   @id @default(cuid())
+  plateNumber         String   @unique
+  brand               String
+  model               String
+  year                Int
+  type                String   // car | van | truck | motorcycle
+  status              String   @default("active") // active | maintenance | retired
+  assignedTo          String?  // employee name or null for pool
+  mileage             Int      @default(0)
+  fuelLevel           Int      @default(100)
 
-  logs        FleetLog[]
+  // Purchase & registration data
+  vin                 String?
+  purchasePrice       Float?
+  purchaseDate        DateTime?
+  supplier            String?  // dealership or seller
+  color               String?
+  insuranceExpiry     DateTime?
+  registrationExpiry  DateTime?
+
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  logs                FleetLog[]
+  inspections         VehicleInspection[]
+  services            ServiceRecord[]
+  maintenanceSchedules MaintenanceSchedule[]
 }
 
 model FleetLog {
@@ -127,6 +142,66 @@ model FleetLog {
 
   vehicle      Vehicle  @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
   employee     Employee? @relation(fields: [employeeId], references: [id])
+}
+
+// Weekly driver inspection of a vehicle.
+// If any checklist item is "warning" or "fail", the inspection is flagged
+// and a notification is surfaced to the fleet controller.
+model VehicleInspection {
+  id            String   @id @default(cuid())
+  vehicleId     String
+  inspectorId   String?  // employee who performed inspection (the driver)
+  date          DateTime
+  overallStatus String   @default("pass") // pass | warning | fail
+  flagged       Boolean  @default(false)
+  acknowledgedBy String? // fleet controller who acknowledged the flag
+  acknowledgedAt DateTime?
+  items         String   // JSON: [{id, name, status: "ok"|"warning"|"fail", notes}]
+  notes         String?
+  odoReading    Int?
+  createdAt     DateTime @default(now())
+
+  vehicle       Vehicle  @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+  inspector     Employee? @relation("InspectionInspector", fields: [inspectorId], references: [id])
+}
+
+// Service & repair log — every oil change, wheel rotation, brake job, part replacement.
+model ServiceRecord {
+  id             String   @id @default(cuid())
+  vehicleId      String
+  type           String   // oil-change | wheel-rotation | tire-replacement | brake-service | battery | filter | inspection | repair | other
+  description    String
+  date           DateTime
+  mileage        Int
+  cost           Float    @default(0)
+  performedById  String?  // mechanic / employee
+  supplier       String?  // workshop / parts supplier
+  partsReplaced  String   // JSON: [{name, qty, cost}]
+  notes          String?
+  createdAt      DateTime @default(now())
+
+  vehicle        Vehicle  @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+  performedBy    Employee? @relation("ServiceMechanic", fields: [performedById], references: [id])
+}
+
+// Recurring maintenance schedule — wheel rotation, oil change, brake check, etc.
+// Generates "due now" / "overdue" notifications.
+model MaintenanceSchedule {
+  id                   String    @id @default(cuid())
+  vehicleId            String
+  task                 String    // e.g. "Wheel rotation", "Oil change", "Brake inspection"
+  intervalType         String    // mileage | time | both
+  intervalMileage      Int?      // every N km
+  intervalDays         Int?      // every N days
+  lastPerformedDate    DateTime?
+  lastPerformedMileage Int?
+  nextDueDate          DateTime?
+  nextDueMileage       Int?
+  notes                String?
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
+
+  vehicle              Vehicle   @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
 }
 
 model WeeklyReport {

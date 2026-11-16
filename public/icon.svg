@@ -1,8 +1,8 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-  <rect width="512" height="512" rx="96" fill="#0f172a"/>
-  <rect x="64" y="120" width="384" height="48" rx="24" fill="#22d3ee"/>
-  <rect x="64" y="232" width="384" height="48" rx="24" fill="#34d399"/>
-  <rect x="64" y="344" width="240" height="48" rx="24" fill="#f59e0b"/>
-  <circle cx="400" cy="368" r="36" fill="#f43f5e"/>
-  <text x="256" y="80" font-family="Arial, sans-serif" font-size="48" font-weight="700" fill="#e2e8f0" text-anchor="middle">WorkHub</text>
+  <rect width="512" height="512" rx="96" fill="#0d7a8a"/>
+  <rect x="64" y="120" width="384" height="44" rx="22" fill="#ffffff" opacity="0.95"/>
+  <rect x="64" y="232" width="296" height="44" rx="22" fill="#ffffff" opacity="0.75"/>
+  <rect x="64" y="344" width="216" height="44" rx="22" fill="#ffffff" opacity="0.55"/>
+  <circle cx="416" cy="366" r="36" fill="#fbbf24"/>
+  <text x="256" y="80" font-family="Arial, sans-serif" font-size="36" font-weight="700" fill="#ffffff" text-anchor="middle" opacity="0.85">WorkHub</text>
 </svg>

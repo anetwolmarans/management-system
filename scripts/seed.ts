@@ -3,6 +3,9 @@ import { db } from "../src/lib/db";
 
 async function main() {
   // Wipe existing data so re-seeding is idempotent.
+  await db.maintenanceSchedule.deleteMany();
+  await db.serviceRecord.deleteMany();
+  await db.vehicleInspection.deleteMany();
   await db.setting.deleteMany();
   await db.sheet.deleteMany();
   await db.weeklyReport.deleteMany();
@@ -161,15 +164,29 @@ async function main() {
     });
   }
 
-  // ---------- Vehicles ----------
+  // ---------- Vehicles (with purchase data) ----------
   const vehicles = [
-    { plateNumber: "WH-101-A", brand: "Ford", model: "Transit", year: 2022, type: "van", assignedTo: "Marcus Reyes", mileage: 48230, fuelLevel: 75 },
-    { plateNumber: "WH-102-B", brand: "Mercedes", model: "Sprinter", year: 2023, type: "van", assignedTo: "Tom Bradley", mileage: 21340, fuelLevel: 60 },
-    { plateNumber: "WH-103-C", brand: "Isuzu", model: "NPR", year: 2021, type: "truck", assignedTo: null, mileage: 92110, fuelLevel: 40 },
-    { plateNumber: "WH-104-D", brand: "Toyota", model: "Hilux", year: 2024, type: "truck", assignedTo: "Nina Petrova", mileage: 8900, fuelLevel: 90 },
-    { plateNumber: "WH-105-E", brand: "Volkswagen", model: "Caddy", year: 2020, type: "van", assignedTo: null, mileage: 124500, fuelLevel: 25 },
-    { plateNumber: "WH-106-F", brand: "Honda", model: "PCX", year: 2023, type: "motorcycle", assignedTo: "Carlos Mendoza", mileage: 5600, fuelLevel: 80 },
-    { plateNumber: "WH-107-G", brand: "Ford", model: "Ranger", year: 2022, type: "truck", assignedTo: "James O'Brien", mileage: 31200, fuelLevel: 55 },
+    { plateNumber: "WH-101-A", brand: "Ford", model: "Transit", year: 2022, type: "van", assignedTo: "Marcus Reyes", mileage: 48230, fuelLevel: 75,
+      vin: "1FTBR1X8XNKA12345", purchasePrice: 42000, purchaseDate: new Date(2022, 2, 14), supplier: "City Ford Dealership", color: "White",
+      insuranceExpiry: new Date(2027, 2, 14), registrationExpiry: new Date(2027, 5, 30) },
+    { plateNumber: "WH-102-B", brand: "Mercedes", model: "Sprinter", year: 2023, type: "van", assignedTo: "Tom Bradley", mileage: 21340, fuelLevel: 60,
+      vin: "WD3PE8CC8P5123456", purchasePrice: 58000, purchaseDate: new Date(2023, 5, 1), supplier: "Star Motors", color: "Silver",
+      insuranceExpiry: new Date(2027, 5, 1), registrationExpiry: new Date(2027, 8, 15) },
+    { plateNumber: "WH-103-C", brand: "Isuzu", model: "NPR", year: 2021, type: "truck", assignedTo: null, mileage: 92110, fuelLevel: 40,
+      vin: "JALCD58R670012345", purchasePrice: 78000, purchaseDate: new Date(2021, 0, 20), supplier: "TruckZone Commercial", color: "Yellow",
+      insuranceExpiry: new Date(2026, 11, 1), registrationExpiry: new Date(2027, 0, 20) },
+    { plateNumber: "WH-104-D", brand: "Toyota", model: "Hilux", year: 2024, type: "truck", assignedTo: "Nina Petrova", mileage: 8900, fuelLevel: 90,
+      vin: "AHTKB8CD403123456", purchasePrice: 46000, purchaseDate: new Date(2024, 1, 10), supplier: "Toyota Eastgate", color: "Graphite",
+      insuranceExpiry: new Date(2028, 1, 10), registrationExpiry: new Date(2028, 1, 10) },
+    { plateNumber: "WH-105-E", brand: "Volkswagen", model: "Caddy", year: 2020, type: "van", assignedTo: null, mileage: 124500, fuelLevel: 25,
+      vin: "WVWZZZ2KZAW012345", purchasePrice: 28000, purchaseDate: new Date(2020, 4, 22), supplier: "VW Fleet Sales", color: "Blue",
+      insuranceExpiry: new Date(2026, 9, 22), registrationExpiry: new Date(2026, 11, 30) },
+    { plateNumber: "WH-106-F", brand: "Honda", model: "PCX", year: 2023, type: "motorcycle", assignedTo: "Carlos Mendoza", mileage: 5600, fuelLevel: 80,
+      vin: "JH2MF6500PK001234", purchasePrice: 4800, purchaseDate: new Date(2023, 7, 5), supplier: "Rider Honda", color: "Red",
+      insuranceExpiry: new Date(2027, 7, 5), registrationExpiry: new Date(2027, 7, 5) },
+    { plateNumber: "WH-107-G", brand: "Ford", model: "Ranger", year: 2022, type: "truck", assignedTo: "James O'Brien", mileage: 31200, fuelLevel: 55,
+      vin: "1FTYR14C9NKA12345", purchasePrice: 51000, purchaseDate: new Date(2022, 8, 12), supplier: "City Ford Dealership", color: "Black",
+      insuranceExpiry: new Date(2027, 8, 12), registrationExpiry: new Date(2027, 8, 12) },
   ];
   const createdVehicles = [];
   for (const v of vehicles) {
@@ -184,6 +201,13 @@ async function main() {
         assignedTo: v.assignedTo,
         mileage: v.mileage,
         fuelLevel: v.fuelLevel,
+        vin: v.vin,
+        purchasePrice: v.purchasePrice,
+        purchaseDate: v.purchaseDate,
+        supplier: v.supplier,
+        color: v.color,
+        insuranceExpiry: v.insuranceExpiry,
+        registrationExpiry: v.registrationExpiry,
       },
     });
     createdVehicles.push(veh);
@@ -214,6 +238,220 @@ async function main() {
           distance,
           fuelCost: Math.round((distance * 0.12) * 100) / 100,
           purpose: purposes[Math.floor(Math.random() * purposes.length)],
+        },
+      });
+    }
+  }
+
+  // ---------- Weekly Driver Inspections ----------
+  // Standard checklist used for every inspection
+  const inspectionChecklistTemplate = [
+    { id: "tires", name: "Tires & tread" },
+    { id: "brakes", name: "Brakes" },
+    { id: "lights", name: "Lights (head/tail/indicators)" },
+    { id: "fluids", name: "Fluid levels (oil/coolant/brake)" },
+    { id: "wipers", name: "Wipers & washers" },
+    { id: "body", name: "Body & mirrors" },
+    { id: "seatbelts", name: "Seatbelts" },
+    { id: "horn", name: "Horn" },
+    { id: "exhaust", name: "Exhaust / emissions" },
+    { id: "steering", name: "Steering & suspension" },
+  ];
+
+  // Run inspections weekly for the past 4 weeks. Some will randomly fail/warn.
+  for (let w = 0; w < 4; w++) {
+    const weekOffset = w * 7;
+    const inspDate = new Date(today);
+    inspDate.setDate(today.getDate() - weekOffset);
+    inspDate.setHours(9, 0, 0, 0);
+
+    for (const veh of createdVehicles) {
+      if (veh.status === "retired") continue;
+      // Skip ~20% randomly to vary density
+      if (Math.random() < 0.2 && w > 0) continue;
+
+      // Decide if this inspection flags issues (~25% chance)
+      const willFlag = Math.random() < 0.25;
+      const items = inspectionChecklistTemplate.map((t) => {
+        let status: "ok" | "warning" | "fail" = "ok";
+        let notes = "";
+        if (willFlag && Math.random() < 0.35) {
+          status = Math.random() < 0.4 ? "fail" : "warning";
+          const noteMap: Record<string, string> = {
+            tires: "Front-left tire tread below 3mm — needs replacement.",
+            brakes: "Brake pedal feels soft — possible air in lines.",
+            lights: "Reverse light not functioning.",
+            fluids: "Brake fluid below MIN mark.",
+            wipers: "Driver-side wiper blade torn.",
+            body: "Scratch on rear bumper, mirror housing cracked.",
+            seatbelts: "Rear middle belt retractor sticky.",
+            horn: "Horn intermittent.",
+            exhaust: "Visible smoke from exhaust on cold start.",
+            steering: "Slight pull to the right under braking.",
+          };
+          notes = noteMap[t.id] ?? "Needs attention.";
+        }
+        return { ...t, status, notes };
+      });
+
+      const hasFail = items.some((i) => i.status === "fail");
+      const hasWarn = items.some((i) => i.status === "warning");
+      const overallStatus = hasFail ? "fail" : hasWarn ? "warning" : "pass";
+      const flagged = hasFail || hasWarn;
+
+      await db.vehicleInspection.create({
+        data: {
+          vehicleId: veh.id,
+          inspectorId: driverMap[veh.id] ?? null,
+          date: inspDate,
+          overallStatus,
+          flagged,
+          acknowledgedBy: flagged && w >= 2 ? "Sarah Chen" : null,
+          acknowledgedAt: flagged && w >= 2 ? new Date(inspDate.getTime() + 86400000) : null,
+          items: JSON.stringify(items),
+          notes: flagged
+            ? "Driver reported issues during weekly check — needs fleet controller review."
+            : "All checks passed.",
+          odoReading: veh.mileage - Math.floor(Math.random() * 200),
+        },
+      });
+    }
+  }
+
+  // ---------- Service Records (history per vehicle) ----------
+  const serviceTemplates: Array<{ type: string; description: string; task: string; intervalMileage?: number; intervalDays?: number }> = [
+    { type: "oil-change", description: "Engine oil & filter change", task: "Oil change", intervalMileage: 15000, intervalDays: 365 },
+    { type: "wheel-rotation", description: "Tire rotation — front to rear swap", task: "Wheel rotation", intervalMileage: 10000, intervalDays: 180 },
+    { type: "brake-service", description: "Brake pad inspection & cleaning", task: "Brake inspection", intervalMileage: 20000, intervalDays: 365 },
+    { type: "tire-replacement", description: "Replaced worn tires", task: "Tire replacement" },
+    { type: "battery", description: "Battery replacement", task: "Battery replacement", intervalDays: 1095 },
+    { type: "filter", description: "Cabin & air filter replacement", task: "Filter replacement", intervalMileage: 30000 },
+    { type: "inspection", description: "Annual safety inspection", task: "Safety inspection", intervalDays: 365 },
+  ];
+
+  // Helper: round to 2dp
+  const r2 = (n: number) => Math.round(n * 100) / 100;
+
+  for (const veh of createdVehicles) {
+    // Generate 3-5 historical service records per vehicle
+    const numServices = 3 + Math.floor(Math.random() * 3);
+    const used = new Set<number>();
+    for (let i = 0; i < numServices; i++) {
+      let tplIdx = Math.floor(Math.random() * serviceTemplates.length);
+      while (used.has(tplIdx) && used.size < serviceTemplates.length) {
+        tplIdx = (tplIdx + 1) % serviceTemplates.length;
+      }
+      used.add(tplIdx);
+      const tpl = serviceTemplates[tplIdx];
+      const monthsAgo = Math.floor(Math.random() * 18) + 1;
+      const svcDate = new Date(today);
+      svcDate.setMonth(today.getMonth() - monthsAgo);
+      const svcMileage = Math.max(0, veh.mileage - Math.floor(Math.random() * 30000));
+      const partsReplaced: Array<{ name: string; qty: number; cost: number }> = [];
+      let cost = 50 + Math.floor(Math.random() * 200);
+      if (tpl.type === "oil-change") partsReplaced.push({ name: "Engine oil 5W-30 (5L)", qty: 1, cost: 45 });
+      if (tpl.type === "oil-change") partsReplaced.push({ name: "Oil filter", qty: 1, cost: 18 });
+      if (tpl.type === "wheel-rotation") partsReplaced.push({ name: "Wheel weights (balance)", qty: 4, cost: 12 });
+      if (tpl.type === "tire-replacement") {
+        const tireCount = veh.type === "motorcycle" ? 2 : 4;
+        partsReplaced.push({ name: "All-season tire", qty: tireCount, cost: 110 * tireCount });
+        cost = 100 + tireCount * 110;
+      }
+      if (tpl.type === "brake-service") partsReplaced.push({ name: "Brake pad set", qty: 2, cost: 65 });
+      if (tpl.type === "battery") partsReplaced.push({ name: "Battery 12V 70Ah", qty: 1, cost: 140 });
+      if (tpl.type === "filter") partsReplaced.push({ name: "Cabin filter", qty: 1, cost: 22 });
+      if (tpl.type === "filter") partsReplaced.push({ name: "Air filter", qty: 1, cost: 28 });
+      const partsTotal = partsReplaced.reduce((s, p) => s + p.cost * p.qty, 0);
+      cost = r2(cost + partsTotal * 0.1);
+
+      await db.serviceRecord.create({
+        data: {
+          vehicleId: veh.id,
+          type: tpl.type,
+          description: tpl.description,
+          date: svcDate,
+          mileage: svcMileage,
+          cost: r2(cost),
+          performedById: createdEmployees[7].id, // Carlos Mendoza — dispatcher, also acts as workshop coordinator
+          supplier: ["City Auto Workshop", "FleetCare Services", "QuickFix Garage", "Manufacturer Service Centre"][i % 4],
+          partsReplaced: JSON.stringify(partsReplaced),
+          notes: i === 0 ? "Routine scheduled service." : "",
+        },
+      });
+    }
+  }
+
+  // ---------- Maintenance Schedules (recurring) ----------
+  // Create schedules per vehicle for: oil change, wheel rotation, brake inspection, safety inspection
+  const scheduleTemplates = [
+    { task: "Oil change", intervalType: "both", intervalMileage: 15000, intervalDays: 365 },
+    { task: "Wheel rotation", intervalType: "mileage", intervalMileage: 10000, intervalDays: null },
+    { task: "Brake inspection", intervalType: "mileage", intervalMileage: 20000, intervalDays: null },
+    { task: "Safety inspection", intervalType: "time", intervalMileage: null, intervalDays: 365 },
+    { task: "Tire condition check", intervalType: "time", intervalMileage: null, intervalDays: 90 },
+  ];
+
+  for (const veh of createdVehicles) {
+    for (const tpl of scheduleTemplates) {
+      // Find last matching service for this vehicle (if any)
+      const lastService = await db.serviceRecord.findFirst({
+        where: { vehicleId: veh.id, type: tpl.task.toLowerCase().replace(/\s+/g, "-") },
+        orderBy: { date: "desc" },
+      });
+      // Use last service date if available, otherwise assume a recent "synthetic" service
+      // so the next due date isn't absurdly far in the past.
+      const fallbackDate = new Date(today.getTime() - Math.floor(Math.random() * 200 + 30) * 86400000);
+      const lastDate = lastService?.date ?? fallbackDate;
+      const lastMileage = lastService?.mileage ?? Math.max(0, veh.mileage - Math.floor(Math.random() * 5000 + 1000));
+
+      // Compute next due — fast-forward past dates by repeating the interval until future
+      let nextDueDate: Date | null = null;
+      let nextDueMileage: number | null = null;
+      if (tpl.intervalDays) {
+        nextDueDate = new Date(lastDate);
+        nextDueDate.setDate(nextDueDate.getDate() + tpl.intervalDays);
+        // Fast-forward until nextDueDate is in the future
+        while (nextDueDate.getTime() < today.getTime()) {
+          nextDueDate.setDate(nextDueDate.getDate() + tpl.intervalDays);
+        }
+      }
+      if (tpl.intervalMileage) {
+        nextDueMileage = lastMileage + tpl.intervalMileage;
+        // Fast-forward mileage if already past
+        while (nextDueMileage !== null && nextDueMileage < veh.mileage) {
+          nextDueMileage += tpl.intervalMileage;
+        }
+      }
+
+      // Inject ~25% overdue and ~20% due-soon for demo realism
+      const roll = Math.random();
+      if (roll < 0.25 && nextDueDate) {
+        // Override to overdue (1-15 days past)
+        nextDueDate = new Date(today.getTime() - Math.floor(Math.random() * 15 + 1) * 86400000);
+      } else if (roll < 0.45 && nextDueDate) {
+        // Override to due-soon (1-13 days future)
+        nextDueDate = new Date(today.getTime() + Math.floor(Math.random() * 13 + 1) * 86400000);
+      }
+      if (roll < 0.20 && nextDueMileage) {
+        // Override to mileage-overdue
+        nextDueMileage = veh.mileage - Math.floor(Math.random() * 800 + 50);
+      } else if (roll < 0.35 && nextDueMileage) {
+        // Due-soon by mileage
+        nextDueMileage = veh.mileage + Math.floor(Math.random() * 900 + 100);
+      }
+
+      await db.maintenanceSchedule.create({
+        data: {
+          vehicleId: veh.id,
+          task: tpl.task,
+          intervalType: tpl.intervalType,
+          intervalMileage: tpl.intervalMileage,
+          intervalDays: tpl.intervalDays,
+          lastPerformedDate: lastDate,
+          lastPerformedMileage: lastMileage,
+          nextDueDate,
+          nextDueMileage,
+          notes: "",
         },
       });
     }

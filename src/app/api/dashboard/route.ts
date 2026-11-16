@@ -21,6 +21,9 @@ export async function GET() {
     last4WeeksComplaints,
     allLeave,
     allComplaints,
+    flaggedInspections,
+    overdueMaintenance,
+    dueSoonMaintenance,
   ] = await Promise.all([
     db.employee.findMany(),
     db.loan.findMany({ where: { status: "active" } }),
@@ -33,6 +36,9 @@ export async function GET() {
     db.complaint.findMany({ where: { createdAt: { gte: weekAgo } } }),
     db.leaveRequest.findMany(),
     db.complaint.findMany(),
+    db.vehicleInspection.findMany({ where: { flagged: true, acknowledgedBy: null }, include: { vehicle: true, inspector: true }, orderBy: { date: "desc" }, take: 10 }),
+    db.maintenanceSchedule.findMany({ where: { nextDueDate: { lt: now } }, include: { vehicle: true } }),
+    db.maintenanceSchedule.findMany({ where: { nextDueDate: { gte: now, lt: new Date(now.getTime() + 14 * 86400000) } }, include: { vehicle: true } }),
   ]);
 
   const totalLoanBalance = activeLoans.reduce((s, l) => s + l.balance, 0);
@@ -91,6 +97,10 @@ export async function GET() {
       fleetDistanceWeek: totalFleetDistanceWeek,
       fuelCostWeek: Math.round(totalFuelCostWeek * 100) / 100,
       newComplaintsWeek: last4WeeksComplaints.length,
+      flaggedInspections: flaggedInspections.length,
+      overdueServices: overdueMaintenance.length,
+      dueSoonServices: dueSoonMaintenance.length,
+      fleetAlerts: flaggedInspections.length + overdueMaintenance.length,
     },
     charts: {
       hoursByDay,
@@ -110,5 +120,7 @@ export async function GET() {
     recentReports: weekReports.slice(0, 3),
     recentComplaints: openComplaints.slice(0, 5),
     pendingLeaveList: pendingLeave.slice(0, 5),
+    flaggedInspectionList: flaggedInspections,
+    overdueMaintenanceList: overdueMaintenance,
   });
 }
