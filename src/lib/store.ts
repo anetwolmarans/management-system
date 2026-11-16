@@ -10,6 +10,7 @@ export type SectionId =
   | "complaints"
   | "loans"
   | "fleet"
+  | "factory-reports"
   | "reports"
   | "sheets";
 

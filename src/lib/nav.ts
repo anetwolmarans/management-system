@@ -8,6 +8,7 @@ import {
   Banknote,
   Truck,
   FileBarChart,
+  Factory,
   Table2,
   type LucideIcon,
 } from "lucide-react";
@@ -28,7 +29,8 @@ export const NAV_ITEMS: NavItem[] = [
   { id: "leave", label: "Leave", short: "Leave", icon: CalendarDays, description: "Requests & approvals" },
   { id: "complaints", label: "Complaints", short: "Cases", icon: MessageSquareWarning, description: "Issues & resolutions" },
   { id: "loans", label: "Loans", short: "Loans", icon: Banknote, description: "Advances & installments" },
-  { id: "fleet", label: "Fleet", short: "Fleet", icon: Truck, description: "Vehicles & trips" },
+  { id: "fleet", label: "Fleet", short: "Fleet", icon: Truck, description: "Vehicles, inspections & maintenance" },
+  { id: "factory-reports", label: "Factory Reports", short: "Sites", icon: Factory, description: "Daily multi-site operational reports" },
   { id: "reports", label: "Weekly Reports", short: "Reports", icon: FileBarChart, description: "Operations summaries" },
   { id: "sheets", label: "Sheets", short: "Sheets", icon: Table2, description: "Custom grids (Smartsheet-style)" },
 ];

@@ -204,6 +204,31 @@ model MaintenanceSchedule {
   vehicle              Vehicle   @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
 }
 
+// Daily Factory Report — multi-site operational report (e.g. BAYWASH CLEANING).
+// Sections + items are JSON-encoded for flexibility (matches the document nature of these reports).
+//
+// sections: [{
+//   id, siteName, reporterName, summary,
+//   items: [{ id, category, description, actionNeeded, responsiblePerson, status }]
+// }]
+//
+// category: cleaning-findings | machinery | personnel | ppe-equipment | other
+// status:   open | in-progress | resolved
+model FactoryReport {
+  id           String   @id @default(cuid())
+  reportDate   DateTime
+  company      String
+  frequency    String   @default("DAILY") // DAILY | WEEKLY | MONTHLY
+  compiledBy   String
+  compiledFor  String?
+  title        String
+  sections     String   // JSON
+  status       String   @default("submitted") // draft | submitted | reviewed
+  notes        String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
 model WeeklyReport {
   id                String   @id @default(cuid())
   weekStart         DateTime

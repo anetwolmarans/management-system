@@ -13,6 +13,7 @@ A unified manager workspace that runs as both a **web app** and an installable *
 | **Complaints** | File, filter by status/priority/category, investigate, resolve with notes |
 | **Loans** | Issue loans with interest & term, pay installments, track outstanding balance |
 | **Fleet** | Vehicle registry with **purchase data** (price, date, VIN, supplier, insurance & registration expiry), **weekly driver inspections** (10-point checklist that auto-flags the fleet controller on warning/fail), **service history** with parts replaced (oil, filters, tires, brake pads, batteries), **recurring maintenance schedule** (oil change, wheel rotation, brake inspection, etc.) with **overdue / due-soon / OK** status, and a per-vehicle **history timeline** drawer combining inspections + services |
+| **Factory Reports** | Multi-site daily operational reports (e.g. BAYWASH CLEANING). Each report covers multiple sites (HANGANA, BHL, BACHMUS, DEEP OCEAN, PEREIRA) with categorized action items: **Cleaning Findings, Machinery, Personnel, PPE/Equipment, Other**. Every item tracks description, action needed, responsible person, and status (open / in-progress / resolved). Export to text format that matches the original report layout. |
 | **Weekly Reports** | Auto-generated operational summaries, export to text |
 | **Sheets** | Smartsheet-style grids — custom columns (text/number/select/date), CSV export |
 

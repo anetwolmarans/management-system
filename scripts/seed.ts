@@ -3,6 +3,7 @@ import { db } from "../src/lib/db";
 
 async function main() {
   // Wipe existing data so re-seeding is idempotent.
+  await db.factoryReport.deleteMany();
   await db.maintenanceSchedule.deleteMany();
   await db.serviceRecord.deleteMany();
   await db.vehicleInspection.deleteMany();
@@ -483,6 +484,152 @@ async function main() {
       },
     });
   }
+
+  // ---------- Daily Factory Reports (multi-site operational reports) ----------
+  // Modeled on the BAYWASH CLEANING daily factory report format.
+  const factoryReportSections = [
+    {
+      id: "s1",
+      siteName: "HANGANA",
+      reporterName: "COETZEE",
+      summary: "Cleaning findings discussed with team to rectify. Multiple machinery issues including burned motors and broken OPC.",
+      items: [
+        { id: "i1", category: "cleaning-findings", description: "Conveyor at packer line was dirty, cleaning was done", actionNeeded: "None — completed", responsiblePerson: "Cleaning Team", status: "resolved" },
+        { id: "i2", category: "cleaning-findings", description: "Rust on S/steel poles and sprockets of autoplate", actionNeeded: "Treat rust immediately, schedule descaling", responsiblePerson: "Maintenance Lead", status: "open" },
+        { id: "i3", category: "cleaning-findings", description: "All findings discussed with team to rectify", actionNeeded: "Follow up next shift", responsiblePerson: "Coetzee", status: "in-progress" },
+        { id: "i4", category: "machinery", description: "Machine fitting spring off — almost injured person", actionNeeded: "URGENT: isolate machine, replace fitting spring", responsiblePerson: "Maintenance Lead", status: "open" },
+        { id: "i5", category: "machinery", description: "BWC033 at the workshop (motors burned)", actionNeeded: "Send to workshop for motor rewind", responsiblePerson: "Workshop Supervisor", status: "in-progress" },
+        { id: "i6", category: "machinery", description: "OPC needs repairs — system is not working from inside", actionNeeded: "Diagnose OPC fault, order spare parts", responsiblePerson: "Engineering", status: "open" },
+        { id: "i7", category: "personnel", description: "Haikali booked off sick", actionNeeded: "Arrange cover for shift", responsiblePerson: "HR", status: "in-progress" },
+        { id: "i8", category: "personnel", description: "Teofilus Titus booked off for hand injury", actionNeeded: "File incident report, follow up medical clearance", responsiblePerson: "HR / Safety Officer", status: "open" },
+        { id: "i9", category: "personnel", description: "Oiva Katali AWOL", actionNeeded: "Issue formal AWOL notice, disciplinary follow-up", responsiblePerson: "HR", status: "open" },
+        { id: "i10", category: "personnel", description: "Site has 1 shortage (in place of Humu)", actionNeeded: "Recruit or transfer from pool", responsiblePerson: "Operations Manager", status: "open" },
+        { id: "i11", category: "ppe-equipment", description: "Omankete PPE given to Hangana (Oilskins & gumboots)", actionNeeded: "None — issued", responsiblePerson: "Stores", status: "resolved" },
+        { id: "i12", category: "ppe-equipment", description: "Brushware, Oilskins, Socks and PPE ordered — current ones old and torn", actionNeeded: "Expedite delivery, interim issue from stock", responsiblePerson: "Procurement", status: "in-progress" },
+        { id: "i13", category: "other", description: "Upi change shifts to work 5 hours on Sundays", actionNeeded: "Update roster, confirm with HR", responsiblePerson: "Operations Manager", status: "in-progress" },
+      ],
+    },
+    {
+      id: "s2",
+      siteName: "BHL",
+      reporterName: "FRANS & COETZEE",
+      summary: "Truck and car wash activity. Foamer issues and lighting needs fixing. Leave request pending.",
+      items: [
+        { id: "i1", category: "cleaning-findings", description: "2 trucks and 1 car washed on 23/06/2026", actionNeeded: "None — completed", responsiblePerson: "BHL Team", status: "resolved" },
+        { id: "i2", category: "machinery", description: "Team had difficulty with the foamer, requested assistance", actionNeeded: "Dispatch technician to inspect foamer unit", responsiblePerson: "Maintenance Lead", status: "open" },
+        { id: "i3", category: "cleaning-findings", description: "Container light needs fixing — too dark during morning shift", actionNeeded: "Replace light fitting, electrician call-out", responsiblePerson: "Facilities", status: "open" },
+        { id: "i4", category: "cleaning-findings", description: "Team cleaning yard and inside container", actionNeeded: "Continue daily schedule", responsiblePerson: "BHL Team", status: "in-progress" },
+        { id: "i5", category: "personnel", description: "Simon Andreas wants leave on 25/06/2026", actionNeeded: "Process leave request, arrange cover", responsiblePerson: "HR", status: "open" },
+      ],
+    },
+    {
+      id: "s3",
+      siteName: "BACHMUS",
+      reporterName: "COETZEE",
+      summary: "3 trucks and 1 car washed. Customer complaint about poor cleaning addressed on site.",
+      items: [
+        { id: "i1", category: "cleaning-findings", description: "3 trucks and 1 car washed on 23/06/2026", actionNeeded: "None — completed", responsiblePerson: "Bachmus Team", status: "resolved" },
+        { id: "i2", category: "cleaning-findings", description: "Complaint of poor cleaning on a truck — Coetzee was on site to address the team", actionNeeded: "Re-wash standards briefing, follow-up quality check", responsiblePerson: "Coetzee", status: "in-progress" },
+        { id: "i3", category: "cleaning-findings", description: "Team cleaning ablutions daily if trucks are few", actionNeeded: "Maintain daily schedule", responsiblePerson: "Bachmus Team", status: "in-progress" },
+      ],
+    },
+    {
+      id: "s4",
+      siteName: "DEEP OCEAN",
+      reporterName: "FRANS",
+      summary: "Rust issues across glazing shoots, fish racks and grader pockets. Internal audit upcoming. Site has 3 shortages.",
+      items: [
+        { id: "i1", category: "cleaning-findings", description: "Rust on Glazing shoots, fish racks and grader pockets", actionNeeded: "Team to react all rust immediately", responsiblePerson: "Deep Ocean Team", status: "open" },
+        { id: "i2", category: "cleaning-findings", description: "Plate freezer area to squeegee daily", actionNeeded: "Add to daily cleaning checklist", responsiblePerson: "Site Supervisor", status: "in-progress" },
+        { id: "i3", category: "cleaning-findings", description: "Final rinsing to be done with fresh water", actionNeeded: "Confirm fresh water supply, brief team", responsiblePerson: "Site Supervisor", status: "in-progress" },
+        { id: "i4", category: "other", description: "Site has an internal audit", actionNeeded: "Prepare audit folder, brief team on standards", responsiblePerson: "Quality Manager", status: "open" },
+        { id: "i5", category: "personnel", description: "Site has 3 shortages", actionNeeded: "Coordinate with HR for transfers or new hires", responsiblePerson: "HR / Operations Manager", status: "open" },
+      ],
+    },
+    {
+      id: "s5",
+      siteName: "PEREIRA",
+      reporterName: "FRANS",
+      summary: "Rust on S/Steel of glazing tank and sorting grader. Black brushware needed. Housekeeping issues. One staff member on leave.",
+      items: [
+        { id: "i1", category: "cleaning-findings", description: "Rust on S/Steel of glazing tank and sorting grader", actionNeeded: "Treat rust, schedule descaling", responsiblePerson: "Maintenance Lead", status: "open" },
+        { id: "i2", category: "ppe-equipment", description: "Leonard to order black brushware for drains cleaning", actionNeeded: "Place PO, follow up delivery", responsiblePerson: "Leonard (Procurement)", status: "in-progress" },
+        { id: "i3", category: "cleaning-findings", description: "Poor housekeeping in chemical room", actionNeeded: "Reorganize chemical storage, brief team on standards", responsiblePerson: "Site Supervisor", status: "open" },
+        { id: "i4", category: "personnel", description: "Mathew Niilonga is on leave", actionNeeded: "Arrange cover", responsiblePerson: "HR", status: "resolved" },
+      ],
+    },
+  ];
+
+  await db.factoryReport.create({
+    data: {
+      title: "Daily Factory Report — 24 June 2026",
+      reportDate: new Date("2026-06-24"),
+      company: "BAYWASH CLEANING",
+      frequency: "DAILY",
+      compiledBy: "FRANS AND COETZEE",
+      compiledFor: "OPERATIONS TEAM",
+      sections: JSON.stringify(factoryReportSections),
+      status: "submitted",
+      notes: "Multi-site daily report covering 5 sites. Several urgent machinery items flagged for immediate action.",
+    },
+  });
+
+  // Also create a couple of older reports for history
+  await db.factoryReport.create({
+    data: {
+      title: "Daily Factory Report — 23 June 2026",
+      reportDate: new Date("2026-06-23"),
+      company: "BAYWASH CLEANING",
+      frequency: "DAILY",
+      compiledBy: "FRANS",
+      compiledFor: "OPERATIONS TEAM",
+      sections: JSON.stringify([
+        {
+          id: "s1", siteName: "HANGANA", reporterName: "COETZEE", summary: "Routine day, minor cleaning items.",
+          items: [
+            { id: "i1", category: "cleaning-findings", description: "Conveyor packer line cleaned", actionNeeded: "None", responsiblePerson: "Team", status: "resolved" },
+            { id: "i2", category: "machinery", description: "Routine lubrication of autoplate sprockets", actionNeeded: "None", responsiblePerson: "Maintenance", status: "resolved" },
+          ],
+        },
+        {
+          id: "s2", siteName: "DEEP OCEAN", reporterName: "FRANS", summary: "All clear.",
+          items: [
+            { id: "i1", category: "cleaning-findings", description: "Plate freezer squeegeed", actionNeeded: "None", responsiblePerson: "Team", status: "resolved" },
+          ],
+        },
+      ]),
+      status: "reviewed",
+      notes: "Routine day — all items closed.",
+    },
+  });
+
+  await db.factoryReport.create({
+    data: {
+      title: "Daily Factory Report — 22 June 2026",
+      reportDate: new Date("2026-06-22"),
+      company: "BAYWASH CLEANING",
+      frequency: "DAILY",
+      compiledBy: "COETZEE",
+      compiledFor: "OPERATIONS TEAM",
+      sections: JSON.stringify([
+        {
+          id: "s1", siteName: "BHL", reporterName: "COETZEE", summary: "Foamer issue first reported.",
+          items: [
+            { id: "i1", category: "machinery", description: "Foamer pressure low — first reported", actionNeeded: "Technician call-out", responsiblePerson: "Maintenance Lead", status: "in-progress" },
+            { id: "i2", category: "cleaning-findings", description: "3 trucks washed", actionNeeded: "None", responsiblePerson: "Team", status: "resolved" },
+          ],
+        },
+        {
+          id: "s2", siteName: "PEREIRA", reporterName: "FRANS", summary: "Chemical room housekeeping flagged.",
+          items: [
+            { id: "i1", category: "cleaning-findings", description: "Chemical room cluttered", actionNeeded: "Reorganize by end of week", responsiblePerson: "Site Supervisor", status: "open" },
+          ],
+        },
+      ]),
+      status: "reviewed",
+      notes: "Foamer issue first surfaced here.",
+    },
+  });
 
   // ---------- Sheets ----------
   const projectSheetColumns = JSON.stringify([

@@ -11,6 +11,7 @@ import { LeaveView } from "@/components/views/leave";
 import { ComplaintsView } from "@/components/views/complaints";
 import { LoansView } from "@/components/views/loans";
 import { FleetView } from "@/components/views/fleet";
+import { FactoryReportsView } from "@/components/views/factory-reports";
 import { ReportsView } from "@/components/views/reports";
 import { SheetsView } from "@/components/views/sheets";
 import { NAV_ITEMS } from "@/lib/nav";
@@ -49,6 +50,7 @@ export function AppShell() {
               {activeSection === "complaints" && <ComplaintsView />}
               {activeSection === "loans" && <LoansView />}
               {activeSection === "fleet" && <FleetView />}
+              {activeSection === "factory-reports" && <FactoryReportsView />}
               {activeSection === "reports" && <ReportsView />}
               {activeSection === "sheets" && <SheetsView />}
             </div>
@@ -72,7 +74,7 @@ function MobileBottomNav() {
   const setActiveSection = useAppStore((s) => s.setActiveSection);
   // Show only 5 priority items in bottom nav
   const items = NAV_ITEMS.filter((n) =>
-    ["dashboard", "employees", "timesheets", "fleet", "sheets"].includes(n.id),
+    ["dashboard", "employees", "timesheets", "fleet", "factory-reports"].includes(n.id),
   );
 
   return (
