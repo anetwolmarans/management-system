@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useAppStore } from "@/lib/store";
 import { NAV_ITEMS } from "@/lib/nav";
 import { cn } from "@/lib/utils";
-import { WorkhubLogo } from "@/components/workhub-logo";
+import { BaywashLogo } from "@/components/baywash-logo";
 import { ChevronsLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -25,12 +25,12 @@ export function Sidebar() {
       {/* Brand header */}
       <div className="flex items-center h-16 px-4 shrink-0 border-b border-sidebar-border">
         <Link href="/" className="flex items-center gap-2.5 overflow-hidden">
-          <WorkhubLogo className="h-8 w-8 shrink-0" />
+          <BaywashLogo variant="inverse" className="h-9 w-9 shrink-0" />
           {!collapsed && (
             <div className="flex flex-col leading-tight overflow-hidden">
-              <span className="font-extrabold text-[15px] tracking-tight">WorkHub</span>
-              <span className="text-[10px] text-sidebar-foreground/60 font-semibold uppercase tracking-wider">
-                Manager Suite
+              <span className="font-extrabold text-[15px] tracking-wide text-white">BAYWASH</span>
+              <span className="text-[9px] text-[#00AEEF] font-bold uppercase tracking-[0.18em]">
+                Group · Manager Suite
               </span>
             </div>
           )}

@@ -1,6 +1,6 @@
-# WorkHub — Manager Dashboard
+# BAYWASH Group — Manager Dashboard
 
-A unified manager workspace that runs as both a **web app** and an installable **PWA (APK-style)** on Android, designed to be as useful as Smartsheet for cross-team operations.
+A unified manager workspace for **BAYWASH Group** that runs as both a **web app** and an installable **PWA (APK-style)** on Android, designed to be as useful as Smartsheet for cross-team operations.
 
 ## Features
 
@@ -14,8 +14,23 @@ A unified manager workspace that runs as both a **web app** and an installable *
 | **Loans** | Issue loans with interest & term, pay installments, track outstanding balance |
 | **Fleet** | Vehicle registry with **purchase data** (price, date, VIN, supplier, insurance & registration expiry), **weekly driver inspections** (10-point checklist that auto-flags the fleet controller on warning/fail), **service history** with parts replaced (oil, filters, tires, brake pads, batteries), **recurring maintenance schedule** (oil change, wheel rotation, brake inspection, etc.) with **overdue / due-soon / OK** status, and a per-vehicle **history timeline** drawer combining inspections + services |
 | **Factory Reports** | Multi-site daily operational reports (e.g. BAYWASH CLEANING). Each report covers multiple sites (HANGANA, BHL, BACHMUS, DEEP OCEAN, PEREIRA) with categorized action items: **Cleaning Findings, Machinery, Personnel, PPE/Equipment, Other**. Every item tracks description, action needed, responsible person, and status (open / in-progress / resolved). Export to text format that matches the original report layout. |
+| **Company Forms** | The five **official BAYWASH paper forms** digitized — fill them in on screen and **download as a branded PDF** ready to print, sign and send to a client or employee. Includes the full doc-control header (REV/DATE, DOC. NAME, REVIEW NR, CREATED BY, APPROVED BY), navy section banners, YES/NO tick boxes, the leave-table layout, signature lines and page numbers:
+  - **BWCW-IR-01 · Incident Report Form** (BAYWASH CARWASH)
+  - **BWG-ARF-2024 · Accident Report Form** (BAYWASH GROUP) — driver details, accident details, damage, witnesses
+  - **BWG-CCF-01 · Customer Complaint Form** (BAYWASH GROUP)
+  - **BWC-CNF-2024 · Customer Notification Form** (BAYWASH CLEANING) — with purpose blurb & quality-supervisor sign-off
+  - **BC-MLAF-01 · Multi Leave Application Form** (BAYWASH CLEANING) — 6 leave types, unpaid/AWOL table, payments required |
 | **Weekly Reports** | Auto-generated operational summaries, export to text |
 | **Sheets** | Smartsheet-style grids — custom columns (text/number/select/date), CSV export |
+
+## Company Forms highlights
+
+- **Faithful to the originals** — each PDF reproduces the paper document: logo header, doc-control table, company strip, section banners, fill-in boxes, checkboxes, signature lines and date fields.
+- **Auto document IDs** — new forms are pre-filled with the next sequential ID (e.g. `IR-2026-0002`, `CC-2026-0001`).
+- **Required-field validation** — the Save buttons stay disabled until the mandatory fields (marked `*`) are filled.
+- **Save & download PDF** — one click saves the submission and downloads the branded PDF (filename like `BWCW-IR-01_IR-2026-0001.pdf`).
+- **Printed signatory names** — optional name fields appear under the signature lines for sending documents without printing names by hand.
+- **Edit anytime** — reopen any saved form, update it and re-download the PDF.
 
 ## Fleet module highlights
 
@@ -28,10 +43,11 @@ A unified manager workspace that runs as both a **web app** and an installable *
 
 ## Design system
 
-- **Primary palette:** deep teal (`oklch(0.48 0.10 200)`) — professional, fleet-friendly, distinctive
+- **Brand palette (from the BAYWASH Group logo):** deep navy `#01205E` (sidebar, primary buttons, wordmark) + brand cyan `#00AEEF` (water-drop accent, active nav items, charts)
+- **Logo:** custom SVG mark — two cupped hands holding a water drop — in the sidebar, mobile nav, and PWA icons
 - **Accents:** cyan, emerald, amber, rose, violet, orange — used for status badges and chart series
-- **Light & dark themes** with refined contrast and tinted sidebar
-- **Card hover lift** and gradient header bar for tactile feel
+- **Light & dark themes** with refined contrast and navy sidebar
+- **Card hover lift** and cyan→navy gradient hero for tactile feel
 - **Responsive** — desktop sidebar, mobile hamburger sheet + bottom nav
 
 ## Install as an app (PWA / APK-style)

@@ -1,4 +1,4 @@
-// Global UI state for WorkHub — active section + sidebar state.
+// Global UI state for BAYWASH Group manager workspace — active section + sidebar state.
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
@@ -9,6 +9,7 @@ export type SectionId =
   | "leave"
   | "complaints"
   | "loans"
+  | "forms"
   | "fleet"
   | "factory-reports"
   | "reports"

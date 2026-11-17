@@ -44,122 +44,122 @@
 }
 
 /* ============================================================
-   WorkHub Design System — "Flat Ocean" edition
-   Inspired by the flat mobile UI kit:
-   • Primary:  teal / turquoise  (#14A8A0-ish)
-   • Deep:     ocean blue navy   (#146B8F-ish)  — sidebar, hero
-   • Accent:   sunshine yellow   (#FFC53D-ish)  — active states, CTAs
-   • White cards on soft cool-gray background, pill-shaped controls
+   BAYWASH Group Design System — "Deep Water" edition
+   Brand colors taken directly from the BAYWASH Group logo:
+   • Navy:     #01205E  (oklch 0.27 0.12 262) — wordmark, sidebar, primary buttons
+   • Cyan:     #00AEEF  (oklch 0.71 0.15 233) — water drop, hands, active states
+   • Mid blue: #3B5899  — supporting tone for charts / secondary text
+   • White cards on a soft cool-blue background, pill-shaped controls
    ============================================================ */
 :root {
   --radius: 0.75rem;
 
   /* Surfaces */
-  --background: oklch(0.965 0.008 210);          /* soft cool gray like the template */
-  --foreground: oklch(0.22 0.03 235);            /* deep navy-slate text */
+  --background: oklch(0.968 0.008 240);          /* soft cool blue-gray */
+  --foreground: oklch(0.24 0.045 262);           /* deep navy-slate text */
   --card: oklch(1 0 0);
-  --card-foreground: oklch(0.22 0.03 235);
+  --card-foreground: oklch(0.24 0.045 262);
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.22 0.03 235);
+  --popover-foreground: oklch(0.24 0.045 262);
 
-  /* Primary — teal */
-  --primary: oklch(0.62 0.115 195);
-  --primary-foreground: oklch(0.99 0.005 190);
+  /* Primary — brand navy (the "BAYWASH" wordmark color) */
+  --primary: oklch(0.30 0.115 262);
+  --primary-foreground: oklch(0.99 0.003 240);
 
-  /* Deep ocean blue — used via .bg-deep / sidebar / hero */
-  --deep: oklch(0.45 0.085 230);
-  --deep-foreground: oklch(0.98 0.005 200);
+  /* Brand navy — used via .bg-deep / sidebar / hero */
+  --deep: oklch(0.30 0.115 262);
+  --deep-foreground: oklch(0.98 0.005 240);
 
-  /* Sunshine yellow accent */
-  --sun: oklch(0.85 0.15 88);
-  --sun-foreground: oklch(0.30 0.06 235);
+  /* Brand cyan — the water drop / hands color (highlights, active nav) */
+  --sun: oklch(0.71 0.15 233);
+  --sun-foreground: oklch(0.24 0.09 262);
 
-  /* Secondary — soft teal tint */
-  --secondary: oklch(0.94 0.03 195);
-  --secondary-foreground: oklch(0.40 0.09 210);
+  /* Secondary — soft blue tint */
+  --secondary: oklch(0.93 0.02 240);
+  --secondary-foreground: oklch(0.35 0.08 262);
 
   /* Muted */
-  --muted: oklch(0.95 0.01 210);
-  --muted-foreground: oklch(0.52 0.02 230);
+  --muted: oklch(0.955 0.008 240);
+  --muted-foreground: oklch(0.50 0.03 260);
 
-  /* Accent (hover surfaces) */
-  --accent: oklch(0.93 0.04 195);
-  --accent-foreground: oklch(0.38 0.09 205);
+  /* Accent (hover surfaces) — light cyan tint */
+  --accent: oklch(0.93 0.035 233);
+  --accent-foreground: oklch(0.38 0.10 262);
 
   /* Status */
   --destructive: oklch(0.60 0.21 28);
 
   /* Borders & inputs */
-  --border: oklch(0.90 0.015 215);
-  --input: oklch(0.90 0.015 215);
-  --ring: oklch(0.62 0.115 195 / 0.55);
+  --border: oklch(0.905 0.012 245);
+  --input: oklch(0.905 0.012 245);
+  --ring: oklch(0.71 0.15 233 / 0.55);
 
-  /* Chart palette — teal, deep blue, yellow, coral, violet */
-  --chart-1: oklch(0.68 0.12 190);   /* teal */
-  --chart-2: oklch(0.52 0.09 230);   /* deep blue */
-  --chart-3: oklch(0.84 0.15 88);    /* yellow */
-  --chart-4: oklch(0.66 0.19 30);    /* coral */
-  --chart-5: oklch(0.62 0.14 295);   /* violet */
+  /* Chart palette — brand blues with supporting tones */
+  --chart-1: oklch(0.62 0.13 235);   /* cyan-dark #018DC5 */
+  --chart-2: oklch(0.34 0.105 262);  /* brand navy */
+  --chart-3: oklch(0.55 0.11 264);   /* mid blue #3B5899 */
+  --chart-4: oklch(0.80 0.09 230);   /* sky */
+  --chart-5: oklch(0.45 0.07 250);   /* slate blue */
 
-  /* Sidebar — deep ocean blue (like colored header bars in the template) */
-  --sidebar: oklch(0.42 0.08 232);
-  --sidebar-foreground: oklch(0.97 0.01 200);
-  --sidebar-primary: oklch(0.85 0.15 88);          /* yellow — active item */
-  --sidebar-primary-foreground: oklch(0.28 0.07 235);
+  /* Sidebar — brand navy (like the BAYWASH wordmark) */
+  --sidebar: oklch(0.27 0.115 262);
+  --sidebar-foreground: oklch(0.97 0.008 240);
+  --sidebar-primary: oklch(0.71 0.15 233);         /* cyan — active item */
+  --sidebar-primary-foreground: oklch(0.27 0.115 262);
   --sidebar-accent: oklch(1 0 0 / 10%);
-  --sidebar-accent-foreground: oklch(0.99 0.005 200);
+  --sidebar-accent-foreground: oklch(0.99 0.005 240);
   --sidebar-border: oklch(1 0 0 / 12%);
-  --sidebar-ring: oklch(0.85 0.15 88 / 0.6);
+  --sidebar-ring: oklch(0.71 0.15 233 / 0.6);
 }
 
 .dark {
   /* Surfaces — deep navy */
-  --background: oklch(0.17 0.03 235);
-  --foreground: oklch(0.96 0.01 210);
-  --card: oklch(0.22 0.035 232);
-  --card-foreground: oklch(0.96 0.01 210);
-  --popover: oklch(0.22 0.035 232);
-  --popover-foreground: oklch(0.96 0.01 210);
+  --background: oklch(0.165 0.03 262);
+  --foreground: oklch(0.955 0.008 240);
+  --card: oklch(0.215 0.04 262);
+  --card-foreground: oklch(0.955 0.008 240);
+  --popover: oklch(0.215 0.04 262);
+  --popover-foreground: oklch(0.955 0.008 240);
 
-  /* Primary — bright teal in dark */
-  --primary: oklch(0.72 0.12 190);
-  --primary-foreground: oklch(0.17 0.03 235);
+  /* Primary — bright cyan in dark */
+  --primary: oklch(0.72 0.135 233);
+  --primary-foreground: oklch(0.18 0.05 262);
 
-  --deep: oklch(0.30 0.06 232);
-  --deep-foreground: oklch(0.97 0.01 200);
+  --deep: oklch(0.30 0.08 262);
+  --deep-foreground: oklch(0.97 0.008 240);
 
-  --sun: oklch(0.85 0.15 88);
-  --sun-foreground: oklch(0.22 0.04 235);
+  --sun: oklch(0.72 0.135 233);
+  --sun-foreground: oklch(0.18 0.05 262);
 
-  --secondary: oklch(0.27 0.04 225);
-  --secondary-foreground: oklch(0.96 0.01 210);
+  --secondary: oklch(0.27 0.045 262);
+  --secondary-foreground: oklch(0.955 0.008 240);
 
-  --muted: oklch(0.25 0.03 232);
-  --muted-foreground: oklch(0.70 0.02 220);
+  --muted: oklch(0.25 0.035 262);
+  --muted-foreground: oklch(0.70 0.02 255);
 
-  --accent: oklch(0.30 0.05 200);
-  --accent-foreground: oklch(0.88 0.08 195);
+  --accent: oklch(0.30 0.06 250);
+  --accent-foreground: oklch(0.88 0.06 235);
 
   --destructive: oklch(0.68 0.20 26);
 
   --border: oklch(1 0 0 / 9%);
   --input: oklch(1 0 0 / 13%);
-  --ring: oklch(0.72 0.12 190 / 0.5);
+  --ring: oklch(0.72 0.135 233 / 0.5);
 
-  --chart-1: oklch(0.72 0.12 190);
-  --chart-2: oklch(0.62 0.10 230);
-  --chart-3: oklch(0.84 0.15 88);
-  --chart-4: oklch(0.70 0.19 28);
-  --chart-5: oklch(0.68 0.14 295);
+  --chart-1: oklch(0.72 0.13 233);
+  --chart-2: oklch(0.62 0.11 260);
+  --chart-3: oklch(0.55 0.11 264);
+  --chart-4: oklch(0.85 0.07 230);
+  --chart-5: oklch(0.48 0.07 250);
 
-  --sidebar: oklch(0.20 0.035 235);
-  --sidebar-foreground: oklch(0.95 0.01 205);
-  --sidebar-primary: oklch(0.85 0.15 88);
-  --sidebar-primary-foreground: oklch(0.22 0.04 235);
+  --sidebar: oklch(0.19 0.04 262);
+  --sidebar-foreground: oklch(0.95 0.008 240);
+  --sidebar-primary: oklch(0.72 0.135 233);
+  --sidebar-primary-foreground: oklch(0.19 0.05 262);
   --sidebar-accent: oklch(1 0 0 / 10%);
-  --sidebar-accent-foreground: oklch(0.97 0.01 200);
+  --sidebar-accent-foreground: oklch(0.97 0.008 240);
   --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.85 0.15 88 / 0.6);
+  --sidebar-ring: oklch(0.72 0.135 233 / 0.6);
 }
 
 @layer base {
@@ -178,27 +178,27 @@
 
 /* ---------- Utility surfaces from the template ---------- */
 
-/* Deep ocean blue surface (hero banners, highlight panels) */
+/* Brand navy surface (hero banners, highlight panels) */
 .bg-deep {
   background-color: var(--deep);
   color: var(--deep-foreground);
 }
 
-/* Sunshine yellow surface (mobile bottom nav, highlight chips) */
+/* Brand cyan surface (mobile bottom nav, highlight chips) */
 .bg-sun {
   background-color: var(--sun);
   color: var(--sun-foreground);
 }
 
-/* Gradient hero: teal → deep blue (like the "HELLO FRIEND" page) */
+/* Gradient hero: cyan → navy (like water pouring into deep water) */
 .hero-gradient {
   background: linear-gradient(
     135deg,
-    oklch(0.60 0.115 195) 0%,
-    oklch(0.52 0.10 210) 45%,
-    oklch(0.45 0.085 230) 100%
+    oklch(0.60 0.14 233) 0%,
+    oklch(0.44 0.125 252) 45%,
+    oklch(0.27 0.115 262) 100%
   );
-  color: oklch(0.99 0.005 195);
+  color: oklch(0.99 0.003 240);
 }
 
 /* Mobile safe area for bottom nav */

@@ -1,12 +1,12 @@
 {
-  "name": "WorkHub — Manager Dashboard",
-  "short_name": "WorkHub",
-  "description": "Unified manager workspace: employees, hours, leave, complaints, loans, fleet, reports, sheets.",
+  "name": "BAYWASH Group — Manager Dashboard",
+  "short_name": "BAYWASH",
+  "description": "BAYWASH Group manager workspace: employees, hours, leave, complaints, loans, fleet, factory reports, sheets.",
   "start_url": "/",
   "display": "standalone",
   "orientation": "portrait-primary",
-  "background_color": "#146B8F",
-  "theme_color": "#146B8F",
+  "background_color": "#01205E",
+  "theme_color": "#01205E",
   "categories": ["business", "productivity", "utilities"],
   "lang": "en",
   "dir": "ltr",
@@ -45,6 +45,11 @@
       "name": "Fleet",
       "url": "/?section=fleet",
       "description": "Track vehicles and trips"
+    },
+    {
+      "name": "Factory Reports",
+      "url": "/?section=factory-reports",
+      "description": "Daily site cleaning reports"
     }
   ]
 }

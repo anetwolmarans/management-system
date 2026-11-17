@@ -9,6 +9,7 @@ async function main() {
   await db.vehicleInspection.deleteMany();
   await db.setting.deleteMany();
   await db.sheet.deleteMany();
+  await db.formSubmission.deleteMany();
   await db.weeklyReport.deleteMany();
   await db.fleetLog.deleteMany();
   await db.vehicle.deleteMany();
@@ -20,18 +21,18 @@ async function main() {
 
   // ---------- Employees ----------
   const employees = [
-    { name: "Sarah Chen", email: "sarah.chen@workhub.app", phone: "+1 555 0101", position: "Operations Manager", department: "Operations", salary: 8200 },
-    { name: "Marcus Reyes", email: "marcus.reyes@workhub.app", phone: "+1 555 0102", position: "Driver", department: "Logistics", salary: 3400 },
-    { name: "Priya Patel", email: "priya.patel@workhub.app", phone: "+1 555 0103", position: "Sales Rep", department: "Sales", salary: 4200 },
-    { name: "David Okafor", email: "david.okafor@workhub.app", phone: "+1 555 0104", position: "Field Technician", department: "Engineering", salary: 5100 },
-    { name: "Emma Lindqvist", email: "emma.l@workhub.app", phone: "+1 555 0105", position: "HR Specialist", department: "HR", salary: 4800 },
-    { name: "Tom Bradley", email: "tom.bradley@workhub.app", phone: "+1 555 0106", position: "Driver", department: "Logistics", salary: 3300 },
-    { name: "Lena Fischer", email: "lena.fischer@workhub.app", phone: "+1 555 0107", position: "Accountant", department: "Finance", salary: 5600 },
-    { name: "Carlos Mendoza", email: "carlos.m@workhub.app", phone: "+1 555 0108", position: "Dispatcher", department: "Operations", salary: 3900 },
-    { name: "Aisha Khan", email: "aisha.khan@workhub.app", phone: "+1 555 0109", position: "Sales Rep", department: "Sales", salary: 4400 },
-    { name: "Robert Liu", email: "robert.liu@workhub.app", phone: "+1 555 0110", position: "Engineer", department: "Engineering", salary: 7200 },
-    { name: "Nina Petrova", email: "nina.p@workhub.app", phone: "+1 555 0111", position: "Driver", department: "Logistics", salary: 3350 },
-    { name: "James O'Brien", email: "james.ob@workhub.app", phone: "+1 555 0112", position: "Field Technician", department: "Engineering", salary: 4950 },
+    { name: "Sarah Chen", email: "sarah.chen@baywashgroup.com", phone: "+1 555 0101", position: "Operations Manager", department: "Operations", salary: 8200 },
+    { name: "Marcus Reyes", email: "marcus.reyes@baywashgroup.com", phone: "+1 555 0102", position: "Driver", department: "Logistics", salary: 3400 },
+    { name: "Priya Patel", email: "priya.patel@baywashgroup.com", phone: "+1 555 0103", position: "Sales Rep", department: "Sales", salary: 4200 },
+    { name: "David Okafor", email: "david.okafor@baywashgroup.com", phone: "+1 555 0104", position: "Field Technician", department: "Engineering", salary: 5100 },
+    { name: "Emma Lindqvist", email: "emma.l@baywashgroup.com", phone: "+1 555 0105", position: "HR Specialist", department: "HR", salary: 4800 },
+    { name: "Tom Bradley", email: "tom.bradley@baywashgroup.com", phone: "+1 555 0106", position: "Driver", department: "Logistics", salary: 3300 },
+    { name: "Lena Fischer", email: "lena.fischer@baywashgroup.com", phone: "+1 555 0107", position: "Accountant", department: "Finance", salary: 5600 },
+    { name: "Carlos Mendoza", email: "carlos.m@baywashgroup.com", phone: "+1 555 0108", position: "Dispatcher", department: "Operations", salary: 3900 },
+    { name: "Aisha Khan", email: "aisha.khan@baywashgroup.com", phone: "+1 555 0109", position: "Sales Rep", department: "Sales", salary: 4400 },
+    { name: "Robert Liu", email: "robert.liu@baywashgroup.com", phone: "+1 555 0110", position: "Engineer", department: "Engineering", salary: 7200 },
+    { name: "Nina Petrova", email: "nina.p@baywashgroup.com", phone: "+1 555 0111", position: "Driver", department: "Logistics", salary: 3350 },
+    { name: "James O'Brien", email: "james.ob@baywashgroup.com", phone: "+1 555 0112", position: "Field Technician", department: "Engineering", salary: 4950 },
   ];
 
   const createdEmployees = [];
@@ -39,7 +40,7 @@ async function main() {
     const e = employees[i];
     const emp = await db.employee.create({
       data: {
-        employeeNo: `WH-${String(1001 + i).padStart(4, "0")}`,
+        employeeNo: `BW-${String(1001 + i).padStart(4, "0")}`,
         name: e.name,
         email: e.email,
         phone: e.phone,
@@ -167,25 +168,25 @@ async function main() {
 
   // ---------- Vehicles (with purchase data) ----------
   const vehicles = [
-    { plateNumber: "WH-101-A", brand: "Ford", model: "Transit", year: 2022, type: "van", assignedTo: "Marcus Reyes", mileage: 48230, fuelLevel: 75,
+    { plateNumber: "BW-101-A", brand: "Ford", model: "Transit", year: 2022, type: "van", assignedTo: "Marcus Reyes", mileage: 48230, fuelLevel: 75,
       vin: "1FTBR1X8XNKA12345", purchasePrice: 42000, purchaseDate: new Date(2022, 2, 14), supplier: "City Ford Dealership", color: "White",
       insuranceExpiry: new Date(2027, 2, 14), registrationExpiry: new Date(2027, 5, 30) },
-    { plateNumber: "WH-102-B", brand: "Mercedes", model: "Sprinter", year: 2023, type: "van", assignedTo: "Tom Bradley", mileage: 21340, fuelLevel: 60,
+    { plateNumber: "BW-102-B", brand: "Mercedes", model: "Sprinter", year: 2023, type: "van", assignedTo: "Tom Bradley", mileage: 21340, fuelLevel: 60,
       vin: "WD3PE8CC8P5123456", purchasePrice: 58000, purchaseDate: new Date(2023, 5, 1), supplier: "Star Motors", color: "Silver",
       insuranceExpiry: new Date(2027, 5, 1), registrationExpiry: new Date(2027, 8, 15) },
-    { plateNumber: "WH-103-C", brand: "Isuzu", model: "NPR", year: 2021, type: "truck", assignedTo: null, mileage: 92110, fuelLevel: 40,
+    { plateNumber: "BW-103-C", brand: "Isuzu", model: "NPR", year: 2021, type: "truck", assignedTo: null, mileage: 92110, fuelLevel: 40,
       vin: "JALCD58R670012345", purchasePrice: 78000, purchaseDate: new Date(2021, 0, 20), supplier: "TruckZone Commercial", color: "Yellow",
       insuranceExpiry: new Date(2026, 11, 1), registrationExpiry: new Date(2027, 0, 20) },
-    { plateNumber: "WH-104-D", brand: "Toyota", model: "Hilux", year: 2024, type: "truck", assignedTo: "Nina Petrova", mileage: 8900, fuelLevel: 90,
+    { plateNumber: "BW-104-D", brand: "Toyota", model: "Hilux", year: 2024, type: "truck", assignedTo: "Nina Petrova", mileage: 8900, fuelLevel: 90,
       vin: "AHTKB8CD403123456", purchasePrice: 46000, purchaseDate: new Date(2024, 1, 10), supplier: "Toyota Eastgate", color: "Graphite",
       insuranceExpiry: new Date(2028, 1, 10), registrationExpiry: new Date(2028, 1, 10) },
-    { plateNumber: "WH-105-E", brand: "Volkswagen", model: "Caddy", year: 2020, type: "van", assignedTo: null, mileage: 124500, fuelLevel: 25,
+    { plateNumber: "BW-105-E", brand: "Volkswagen", model: "Caddy", year: 2020, type: "van", assignedTo: null, mileage: 124500, fuelLevel: 25,
       vin: "WVWZZZ2KZAW012345", purchasePrice: 28000, purchaseDate: new Date(2020, 4, 22), supplier: "VW Fleet Sales", color: "Blue",
       insuranceExpiry: new Date(2026, 9, 22), registrationExpiry: new Date(2026, 11, 30) },
-    { plateNumber: "WH-106-F", brand: "Honda", model: "PCX", year: 2023, type: "motorcycle", assignedTo: "Carlos Mendoza", mileage: 5600, fuelLevel: 80,
+    { plateNumber: "BW-106-F", brand: "Honda", model: "PCX", year: 2023, type: "motorcycle", assignedTo: "Carlos Mendoza", mileage: 5600, fuelLevel: 80,
       vin: "JH2MF6500PK001234", purchasePrice: 4800, purchaseDate: new Date(2023, 7, 5), supplier: "Rider Honda", color: "Red",
       insuranceExpiry: new Date(2027, 7, 5), registrationExpiry: new Date(2027, 7, 5) },
-    { plateNumber: "WH-107-G", brand: "Ford", model: "Ranger", year: 2022, type: "truck", assignedTo: "James O'Brien", mileage: 31200, fuelLevel: 55,
+    { plateNumber: "BW-107-G", brand: "Ford", model: "Ranger", year: 2022, type: "truck", assignedTo: "James O'Brien", mileage: 31200, fuelLevel: 55,
       vin: "1FTYR14C9NKA12345", purchasePrice: 51000, purchaseDate: new Date(2022, 8, 12), supplier: "City Ford Dealership", color: "Black",
       insuranceExpiry: new Date(2027, 8, 12), registrationExpiry: new Date(2027, 8, 12) },
   ];
@@ -271,13 +272,24 @@ async function main() {
       // Skip ~20% randomly to vary density
       if (Math.random() < 0.2 && w > 0) continue;
 
-      // Decide if this inspection flags issues (~25% chance)
-      const willFlag = Math.random() < 0.25;
+      // Decide if this inspection flags issues (~25% chance).
+      // Deterministic demo hook: the current week (w=0) ALWAYS has one warning
+      // (first vehicle) and one fail (second vehicle) so the fleet-controller
+      // acknowledgement workflow is demonstrable right after seeding.
+      let willFlag = Math.random() < 0.25;
+      let forcedStatus: "warning" | "fail" | null = null;
+      if (w === 0 && veh.id === createdVehicles[0].id) {
+        willFlag = true;
+        forcedStatus = "warning";
+      } else if (w === 0 && createdVehicles[1] && veh.id === createdVehicles[1].id) {
+        willFlag = true;
+        forcedStatus = "fail";
+      }
       const items = inspectionChecklistTemplate.map((t) => {
         let status: "ok" | "warning" | "fail" = "ok";
         let notes = "";
-        if (willFlag && Math.random() < 0.35) {
-          status = Math.random() < 0.4 ? "fail" : "warning";
+        if (willFlag && (forcedStatus !== null || Math.random() < 0.35)) {
+          status = forcedStatus ?? (Math.random() < 0.4 ? "fail" : "warning");
           const noteMap: Record<string, string> = {
             tires: "Front-left tire tread below 3mm — needs replacement.",
             brakes: "Brake pedal feels soft — possible air in lines.",
@@ -683,8 +695,74 @@ async function main() {
     },
   });
 
+  // ---------- Official company form samples ----------
+  await db.formSubmission.create({
+    data: {
+      template: "incident-report",
+      createdBy: "Sarah Chen",
+      data: JSON.stringify({
+        incidentId: "IR-2026-0001",
+        dateOfIncident: "2026-11-12",
+        timeOfIncident: "10:45",
+        customerName: "Anna Visser",
+        customerInformation: "Tel: +264 81 234 5678 · anna.visser@example.com · Swakopmund",
+        dateCustomerReported: "2026-11-12",
+        vehicleDetails: "Toyota Corolla 2020 · white · CA-456-123",
+        natureOfDamage: "Scratches on the left rear door panel and scuff mark on rear bumper caused by vacuum hose attachment falling during interior cleaning.",
+        employeeInvolved: "yes",
+        employeeNames: "Tom Bradley",
+        actionTakenByCustomer: "Reported the damage immediately at the service desk with photos.",
+        desiredResolution: "Professional polish & touch-up paint at no cost.",
+        actionTakenByCompany: "Incident logged; body shop quotation requested; customer offered courtesy wash while awaiting assessment.",
+        employeeHandling: "Sarah Chen",
+        followUpActions: "Body shop assessment on 14/11/2026; repair scheduled for 18/11/2026; manager to confirm completion with customer.",
+        managementSignatory: "Dirk Bosman",
+      }),
+    },
+  });
+  await db.formSubmission.create({
+    data: {
+      template: "customer-complaint",
+      createdBy: "Sarah Chen",
+      data: JSON.stringify({
+        date: "2026-11-14",
+        complaintId: "CC-2026-0001",
+        receivedVia: "Phone call",
+        clientName: "Pieter van Wyk",
+        clientEmail: "p.vanwyk@example.com",
+        supervisorName: "Carlos Mendoza",
+        employeeName: "Lena Fischer",
+        incidentDetails: "Client states the interior was not fully cleaned — crumbs still visible on the back seats and a faint damp smell after the full-service wash on 13/11/2026.",
+        clientWants: "Free re-clean of the interior and assurance the drying process is improved.",
+        companyAction: "Apologised; re-clean scheduled same afternoon at no charge; drying protocol reviewed with the team.",
+        dealtWithBy: "Carlos Mendoza",
+        complaintHandled: "yes",
+        managementSignatory: "Dirk Bosman",
+        employeeSignatory: "Carlos Mendoza",
+      }),
+    },
+  });
+  await db.formSubmission.create({
+    data: {
+      template: "leave-application",
+      createdBy: "Emma Lindqvist",
+      data: JSON.stringify({
+        employeeName: "Marcus Reyes",
+        companyNo: "BW-1002",
+        section: "Logistics",
+        l1Opts: ["FULL"],
+        l1From: "2026-12-01",
+        l1To: "2026-12-12",
+        l1Days: "10",
+        addressWhileOnLeave: "14 Coral Street, Vineta, Swakopmund",
+        holidayBonus: "yes",
+        leavePay: "yes",
+      }),
+    },
+  });
+
   // ---------- Settings ----------
-  await db.setting.create({ data: { key: "company.name", value: "WorkHub Demo Co." } });
+  await db.setting.create({ data: { key: "company.name", value: "BAYWASH Group" } });
   await db.setting.create({ data: { key: "company.currency", value: "USD" } });
   await db.setting.create({ data: { key: "leave.annual.allowance", value: "21" } });
 

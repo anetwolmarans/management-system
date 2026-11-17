@@ -45,7 +45,8 @@ interface DashboardData {
   pendingLeaveList: { id: string; type: string; days: number; employee?: { name: string } }[];
 }
 
-const PIE_COLORS = ["#14A8A0", "#146B8F", "#FFC53D", "#F0625D", "#8B5CF6", "#2EB5AC", "#F7A072"];
+// BAYWASH brand chart palette: navy, cyan, mid-blue, sky, slate + status tones
+const PIE_COLORS = ["#01205E", "#00AEEF", "#018DC5", "#3B5899", "#7FCBEC", "#F0625D", "#94A8D8"];
 
 export function DashboardView() {
   const setActiveSection = useAppStore((s) => s.setActiveSection);
@@ -77,11 +78,11 @@ export function DashboardView() {
 
   return (
     <div className="space-y-6">
-      {/* Hero banner — gradient teal→deep blue like the flat-design welcome page */}
+      {/* Hero banner — gradient cyan→navy, BAYWASH brand */}
       <div className="hero-gradient rounded-2xl p-5 md:p-6 relative overflow-hidden">
         <div className="absolute -right-8 -top-10 h-40 w-40 rounded-full bg-white/10" aria-hidden="true" />
         <div className="absolute -right-2 top-16 h-24 w-24 rounded-full bg-white/10" aria-hidden="true" />
-        <div className="absolute right-10 -bottom-8 h-28 w-28 rounded-full bg-[oklch(0.85_0.15_88)]/25" aria-hidden="true" />
+        <div className="absolute right-10 -bottom-8 h-28 w-28 rounded-full bg-[#00AEEF]/25" aria-hidden="true" />
         <div className="relative flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div>
             <p className="text-xs font-bold uppercase tracking-widest text-white/70">
@@ -97,7 +98,7 @@ export function DashboardView() {
           <div className="flex flex-wrap gap-2">
             <button
               onClick={() => setActiveSection("factory-reports")}
-              className="bg-[oklch(0.85_0.15_88)] text-[oklch(0.30_0.06_235)] rounded-full px-4 py-2 text-sm font-bold hover:brightness-105 transition-all shadow-md"
+              className="bg-[#00AEEF] text-[#01205E] rounded-full px-4 py-2 text-sm font-bold hover:brightness-105 transition-all shadow-md"
             >
               New factory report
             </button>
@@ -137,7 +138,7 @@ export function DashboardView() {
                 <XAxis dataKey="label" tickLine={false} axisLine={false} fontSize={12} />
                 <YAxis tickLine={false} axisLine={false} fontSize={12} />
                 <Tooltip cursor={{ fill: "rgba(0,0,0,0.04)" }} />
-                <Bar dataKey="hours" fill="#14A8A0" radius={[6, 6, 0, 0]} />
+                <Bar dataKey="hours" fill="#00AEEF" radius={[6, 6, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </CardContent>
@@ -156,9 +157,9 @@ export function DashboardView() {
                 <YAxis tickLine={false} axisLine={false} fontSize={12} />
                 <Tooltip />
                 <Legend iconType="circle" iconSize={8} wrapperStyle={{ fontSize: 12 }} />
-                <Line type="monotone" dataKey="hours" stroke="#14A8A0" strokeWidth={2.5} dot={{ r: 3 }} />
-                <Line type="monotone" dataKey="trips" stroke="#146B8F" strokeWidth={2.5} dot={{ r: 3 }} />
-                <Line type="monotone" dataKey="complaintsResolved" stroke="#FFC53D" strokeWidth={2.5} dot={{ r: 3 }} />
+                <Line type="monotone" dataKey="hours" stroke="#00AEEF" strokeWidth={2.5} dot={{ r: 3 }} />
+                <Line type="monotone" dataKey="trips" stroke="#01205E" strokeWidth={2.5} dot={{ r: 3 }} />
+                <Line type="monotone" dataKey="complaintsResolved" stroke="#018DC5" strokeWidth={2.5} dot={{ r: 3 }} />
               </LineChart>
             </ResponsiveContainer>
           </CardContent>

@@ -10,6 +10,7 @@ import { TimesheetsView } from "@/components/views/timesheets";
 import { LeaveView } from "@/components/views/leave";
 import { ComplaintsView } from "@/components/views/complaints";
 import { LoansView } from "@/components/views/loans";
+import { FormsView } from "@/components/views/forms";
 import { FleetView } from "@/components/views/fleet";
 import { FactoryReportsView } from "@/components/views/factory-reports";
 import { ReportsView } from "@/components/views/reports";
@@ -49,6 +50,7 @@ export function AppShell() {
               {activeSection === "leave" && <LeaveView />}
               {activeSection === "complaints" && <ComplaintsView />}
               {activeSection === "loans" && <LoansView />}
+              {activeSection === "forms" && <FormsView />}
               {activeSection === "fleet" && <FleetView />}
               {activeSection === "factory-reports" && <FactoryReportsView />}
               {activeSection === "reports" && <ReportsView />}
@@ -57,7 +59,7 @@ export function AppShell() {
           </main>
 
           <footer className="border-t bg-background px-4 py-3 text-xs text-muted-foreground flex flex-col sm:flex-row items-center justify-between gap-1">
-            <span>WorkHub Manager Suite — unified ops dashboard</span>
+            <span>BAYWASH Group — unified ops dashboard</span>
             <span className="text-[10px]">Tip: install to home screen for app-like access (PWA)</span>
           </footer>
         </div>
@@ -78,7 +80,7 @@ function MobileBottomNav() {
   );
 
   return (
-    <nav className="md:hidden sticky bottom-0 z-30 bg-sun safe-bottom shadow-[0_-2px_10px_rgba(0,0,0,0.08)]">
+    <nav className="md:hidden sticky bottom-0 z-30 bg-[color:var(--sidebar)] safe-bottom shadow-[0_-2px_10px_rgba(1,32,94,0.25)]">
       <div className="grid grid-cols-5 px-1 pt-1.5 pb-1">
         {items.map((item) => {
           const Icon = item.icon;
@@ -93,8 +95,8 @@ function MobileBottomNav() {
                 className={cn(
                   "flex items-center justify-center h-8 w-8 rounded-full transition-all",
                   active
-                    ? "bg-[oklch(0.42_0.08_232)] text-white shadow-md scale-105"
-                    : "text-[oklch(0.42_0.08_232)]/75",
+                    ? "bg-[color:var(--sidebar-primary)] text-[color:var(--sidebar-primary-foreground)] shadow-md scale-105"
+                    : "text-white/70",
                 )}
               >
                 <Icon className="h-4 w-4" />
@@ -102,7 +104,7 @@ function MobileBottomNav() {
               <span
                 className={cn(
                   "text-[9px] font-bold tracking-wide truncate max-w-full",
-                  active ? "text-[oklch(0.42_0.08_232)]" : "text-[oklch(0.42_0.08_232)]/60",
+                  active ? "text-[color:var(--sidebar-primary)]" : "text-white/55",
                 )}
               >
                 {item.short}
