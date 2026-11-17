@@ -45,7 +45,7 @@ interface DashboardData {
   pendingLeaveList: { id: string; type: string; days: number; employee?: { name: string } }[];
 }
 
-const PIE_COLORS = ["#22d3ee", "#34d399", "#f59e0b", "#f43f5e", "#a78bfa", "#60a5fa", "#fb7185"];
+const PIE_COLORS = ["#14A8A0", "#146B8F", "#FFC53D", "#F0625D", "#8B5CF6", "#2EB5AC", "#F7A072"];
 
 export function DashboardView() {
   const setActiveSection = useAppStore((s) => s.setActiveSection);
@@ -77,15 +77,39 @@ export function DashboardView() {
 
   return (
     <div className="space-y-6">
-      <SectionHeader
-        title="Operations Overview"
-        description={`Today: ${new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric", year: "numeric" })}`}
-        actions={
-          <Button variant="outline" size="sm" onClick={() => setActiveSection("reports")}>
-            View weekly reports
-          </Button>
-        }
-      />
+      {/* Hero banner — gradient teal→deep blue like the flat-design welcome page */}
+      <div className="hero-gradient rounded-2xl p-5 md:p-6 relative overflow-hidden">
+        <div className="absolute -right-8 -top-10 h-40 w-40 rounded-full bg-white/10" aria-hidden="true" />
+        <div className="absolute -right-2 top-16 h-24 w-24 rounded-full bg-white/10" aria-hidden="true" />
+        <div className="absolute right-10 -bottom-8 h-28 w-28 rounded-full bg-[oklch(0.85_0.15_88)]/25" aria-hidden="true" />
+        <div className="relative flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+          <div>
+            <p className="text-xs font-bold uppercase tracking-widest text-white/70">
+              {new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric", year: "numeric" })}
+            </p>
+            <h2 className="text-2xl md:text-3xl font-extrabold tracking-tight mt-1">
+              Hello, Sarah
+            </h2>
+            <p className="text-sm text-white/80 mt-1">
+              Here's what's happening across your operations today.
+            </p>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <button
+              onClick={() => setActiveSection("factory-reports")}
+              className="bg-[oklch(0.85_0.15_88)] text-[oklch(0.30_0.06_235)] rounded-full px-4 py-2 text-sm font-bold hover:brightness-105 transition-all shadow-md"
+            >
+              New factory report
+            </button>
+            <button
+              onClick={() => setActiveSection("fleet")}
+              className="bg-white/15 backdrop-blur text-white rounded-full px-4 py-2 text-sm font-bold hover:bg-white/25 transition-all border border-white/30"
+            >
+              Fleet status
+            </button>
+          </div>
+        </div>
+      </div>
 
       {/* KPI Grid */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4">
@@ -113,7 +137,7 @@ export function DashboardView() {
                 <XAxis dataKey="label" tickLine={false} axisLine={false} fontSize={12} />
                 <YAxis tickLine={false} axisLine={false} fontSize={12} />
                 <Tooltip cursor={{ fill: "rgba(0,0,0,0.04)" }} />
-                <Bar dataKey="hours" fill="#22d3ee" radius={[6, 6, 0, 0]} />
+                <Bar dataKey="hours" fill="#14A8A0" radius={[6, 6, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </CardContent>
@@ -132,9 +156,9 @@ export function DashboardView() {
                 <YAxis tickLine={false} axisLine={false} fontSize={12} />
                 <Tooltip />
                 <Legend iconType="circle" iconSize={8} wrapperStyle={{ fontSize: 12 }} />
-                <Line type="monotone" dataKey="hours" stroke="#22d3ee" strokeWidth={2} dot={{ r: 3 }} />
-                <Line type="monotone" dataKey="trips" stroke="#34d399" strokeWidth={2} dot={{ r: 3 }} />
-                <Line type="monotone" dataKey="complaintsResolved" stroke="#f59e0b" strokeWidth={2} dot={{ r: 3 }} />
+                <Line type="monotone" dataKey="hours" stroke="#14A8A0" strokeWidth={2.5} dot={{ r: 3 }} />
+                <Line type="monotone" dataKey="trips" stroke="#146B8F" strokeWidth={2.5} dot={{ r: 3 }} />
+                <Line type="monotone" dataKey="complaintsResolved" stroke="#FFC53D" strokeWidth={2.5} dot={{ r: 3 }} />
               </LineChart>
             </ResponsiveContainer>
           </CardContent>
@@ -184,7 +208,7 @@ export function DashboardView() {
                   <XAxis type="number" tickLine={false} axisLine={false} fontSize={12} />
                   <YAxis type="category" dataKey="name" tickLine={false} axisLine={false} fontSize={12} width={90} />
                   <Tooltip cursor={{ fill: "rgba(0,0,0,0.04)" }} />
-                  <Bar dataKey="value" fill="#f43f5e" radius={[0, 6, 6, 0]} />
+                  <Bar dataKey="value" fill="#F0625D" radius={[0, 6, 6, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             )}

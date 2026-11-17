@@ -10,11 +10,14 @@ export function WorkhubLogo({ className }: { className?: string }) {
       xmlns="http://www.w3.org/2000/svg"
       aria-hidden="true"
     >
-      <rect width="48" height="48" rx="11" fill="currentColor" className="text-primary" />
-      <rect x="6" y="11" width="36" height="4.5" rx="2.25" fill="#ffffff" opacity="0.95" />
-      <rect x="6" y="22" width="28" height="4.5" rx="2.25" fill="#ffffff" opacity="0.75" />
-      <rect x="6" y="33" width="20" height="4.5" rx="2.25" fill="#ffffff" opacity="0.55" />
-      <circle cx="39" cy="35.25" r="3.5" fill="#fbbf24" />
+      {/* Rounded square — deep ocean blue */}
+      <rect width="48" height="48" rx="12" fill="#146B8F" />
+      {/* Teal bars */}
+      <rect x="6" y="11" width="36" height="4.5" rx="2.25" fill="#2EB5AC" />
+      <rect x="6" y="22" width="28" height="4.5" rx="2.25" fill="#2EB5AC" opacity="0.7" />
+      <rect x="6" y="33" width="20" height="4.5" rx="2.25" fill="#2EB5AC" opacity="0.45" />
+      {/* Sunshine yellow dot */}
+      <circle cx="39" cy="35.25" r="3.5" fill="#FFC53D" />
     </svg>
   );
 }

@@ -1,24 +1,26 @@
 import type { Metadata, Viewport } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Nunito, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { ThemeProvider } from "@/components/theme-provider";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+// Nunito — rounded, friendly geometric sans matching the flat-design reference
+const nunito = Nunito({
+  variable: "--font-app-sans",
   subsets: ["latin"],
+  weight: ["400", "500", "600", "700", "800", "900"],
 });
 
 const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+  variable: "--font-app-mono",
   subsets: ["latin"],
 });
 
 export const metadata: Metadata = {
   title: "WorkHub — Manager Dashboard",
   description:
-    "Unified manager workspace: employees, hours, leave, complaints, loans, fleet tracking, weekly reports and Smartsheet-style sheets.",
+    "Unified manager workspace: employees, hours, leave, complaints, loans, fleet tracking, factory reports, weekly reports and Smartsheet-style sheets.",
   keywords: [
     "WorkHub",
     "employee management",
@@ -28,6 +30,7 @@ export const metadata: Metadata = {
     "leave management",
     "loan management",
     "complaints",
+    "factory reports",
     "weekly reports",
     "smartsheet",
   ],
@@ -50,7 +53,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#0f172a",
+  themeColor: "#146B8F",
   width: "device-width",
   initialScale: 1,
   maximumScale: 1,
@@ -64,10 +67,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-background text-foreground`}
-      >
+    <html lang="en" suppressHydrationWarning className={`${nunito.variable} ${geistMono.variable}`}>
+      <body className="antialiased bg-background text-foreground">
         <ThemeProvider
           attribute="class"
           defaultTheme="light"

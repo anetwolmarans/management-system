@@ -78,8 +78,8 @@ function MobileBottomNav() {
   );
 
   return (
-    <nav className="md:hidden sticky bottom-0 z-30 border-t bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 safe-bottom">
-      <div className="grid grid-cols-5">
+    <nav className="md:hidden sticky bottom-0 z-30 bg-sun safe-bottom shadow-[0_-2px_10px_rgba(0,0,0,0.08)]">
+      <div className="grid grid-cols-5 px-1 pt-1.5 pb-1">
         {items.map((item) => {
           const Icon = item.icon;
           const active = activeSection === item.id;
@@ -87,13 +87,26 @@ function MobileBottomNav() {
             <button
               key={item.id}
               onClick={() => setActiveSection(item.id)}
-              className={cn(
-                "flex flex-col items-center gap-0.5 py-2 px-1 text-[10px] font-medium transition-colors",
-                active ? "text-primary" : "text-muted-foreground",
-              )}
+              className="flex flex-col items-center gap-0.5 py-1 px-0.5"
             >
-              <Icon className="h-4 w-4" />
-              <span className="truncate max-w-full">{item.short}</span>
+              <span
+                className={cn(
+                  "flex items-center justify-center h-8 w-8 rounded-full transition-all",
+                  active
+                    ? "bg-[oklch(0.42_0.08_232)] text-white shadow-md scale-105"
+                    : "text-[oklch(0.42_0.08_232)]/75",
+                )}
+              >
+                <Icon className="h-4 w-4" />
+              </span>
+              <span
+                className={cn(
+                  "text-[9px] font-bold tracking-wide truncate max-w-full",
+                  active ? "text-[oklch(0.42_0.08_232)]" : "text-[oklch(0.42_0.08_232)]/60",
+                )}
+              >
+                {item.short}
+              </span>
             </button>
           );
         })}

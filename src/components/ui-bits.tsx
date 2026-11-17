@@ -15,14 +15,14 @@ interface KpiCardProps {
 }
 
 const accentMap: Record<NonNullable<KpiCardProps["accent"]>, string> = {
-  teal: "bg-teal-500/10 text-teal-700 dark:text-teal-300",
-  cyan: "bg-cyan-500/10 text-cyan-700 dark:text-cyan-300",
-  emerald: "bg-emerald-500/10 text-emerald-700 dark:text-emerald-300",
-  amber: "bg-amber-500/10 text-amber-700 dark:text-amber-300",
-  rose: "bg-rose-500/10 text-rose-700 dark:text-rose-300",
-  violet: "bg-violet-500/10 text-violet-700 dark:text-violet-300",
-  slate: "bg-slate-500/10 text-slate-700 dark:text-slate-300",
-  orange: "bg-orange-500/10 text-orange-700 dark:text-orange-300",
+  teal: "bg-teal-500/15 text-teal-700 dark:text-teal-300",
+  cyan: "bg-cyan-500/15 text-cyan-700 dark:text-cyan-300",
+  emerald: "bg-emerald-500/15 text-emerald-700 dark:text-emerald-300",
+  amber: "bg-amber-400/20 text-amber-600 dark:text-amber-300",
+  rose: "bg-rose-500/15 text-rose-700 dark:text-rose-300",
+  violet: "bg-violet-500/15 text-violet-700 dark:text-violet-300",
+  slate: "bg-slate-500/15 text-slate-700 dark:text-slate-300",
+  orange: "bg-orange-500/15 text-orange-700 dark:text-orange-300",
 };
 
 export function KpiCard({ label, value, hint, icon: Icon, accent = "slate", children }: KpiCardProps) {
@@ -31,12 +31,13 @@ export function KpiCard({ label, value, hint, icon: Icon, accent = "slate", chil
       <CardContent className="p-4 md:p-5">
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0 flex-1">
-            <p className="text-[11px] uppercase tracking-wide text-muted-foreground font-semibold truncate">{label}</p>
-            <p className="text-2xl md:text-[28px] font-bold tracking-tight mt-1.5 leading-none truncate">{value}</p>
+            <p className="text-[11px] uppercase tracking-wider text-muted-foreground font-bold truncate">{label}</p>
+            <p className="text-2xl md:text-[28px] font-extrabold tracking-tight mt-1.5 leading-none truncate">{value}</p>
             {hint && <p className="text-xs text-muted-foreground mt-2 truncate">{hint}</p>}
           </div>
-          <div className={cn("h-9 w-9 rounded-lg flex items-center justify-center shrink-0", accentMap[accent])}>
-            <Icon className="h-[18px] w-[18px]" />
+          {/* Circular icon chip — like the flat-design profile icons */}
+          <div className={cn("h-11 w-11 rounded-full flex items-center justify-center shrink-0", accentMap[accent])}>
+            <Icon className="h-5 w-5" />
           </div>
         </div>
         {children}
@@ -56,9 +57,13 @@ export function SectionHeader({
 }) {
   return (
     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
-      <div className="min-w-0">
-        <h2 className="text-xl md:text-2xl font-semibold tracking-tight truncate">{title}</h2>
-        {description && <p className="text-sm text-muted-foreground mt-0.5">{description}</p>}
+      <div className="min-w-0 flex items-start gap-3">
+        {/* Teal accent bar — like colored section headers in the template */}
+        <span className="mt-1 h-8 w-1.5 rounded-full bg-primary shrink-0" aria-hidden="true" />
+        <div className="min-w-0">
+          <h2 className="text-xl md:text-2xl font-extrabold tracking-tight truncate">{title}</h2>
+          {description && <p className="text-sm text-muted-foreground mt-0.5">{description}</p>}
+        </div>
       </div>
       {actions && <div className="flex items-center gap-2 shrink-0 flex-wrap">{actions}</div>}
     </div>
