@@ -54,3 +54,9 @@ server.log
 /skills/
 # session artifacts
 tool-results/
+
+# data & secrets
+.env
+.env.*
+db/
+*.db
