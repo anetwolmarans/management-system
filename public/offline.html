@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>BAYWASH Group — Offline</title>
+<link rel="manifest" href="/manifest.webmanifest" />
+<meta name="theme-color" content="#01205E" />
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { height: 100%; }
+  body {
+    font-family: "Nunito", -apple-system, "Segoe UI", Roboto, sans-serif;
+    background: linear-gradient(160deg, #01205E 0%, #002059 55%, #00163f 100%);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .card {
+    max-width: 420px;
+    width: 100%;
+    text-align: center;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 24px;
+    padding: 40px 28px 36px;
+    backdrop-filter: blur(6px);
+  }
+  .mark { width: 84px; height: 84px; margin: 0 auto 20px; display: block; }
+  h1 { font-size: 22px; font-weight: 800; letter-spacing: 0.02em; }
+  .status { color: #00AEEF; font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.14em; margin-bottom: 10px; }
+  p { color: rgba(255, 255, 255, 0.78); font-size: 15px; line-height: 1.55; margin: 12px 0 24px; }
+  button {
+    appearance: none; border: 0; cursor: pointer;
+    background: #00AEEF; color: #01205E;
+    font: 800 15px/1 "Nunito", sans-serif;
+    padding: 14px 28px; border-radius: 999px;
+    box-shadow: 0 8px 24px rgba(0, 174, 239, 0.35);
+  }
+  button:active { transform: scale(0.97); }
+  .hint { margin-top: 18px; font-size: 12px; color: rgba(255,255,255,0.5); }
+  .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #f0625d; margin-right: 6px; }
+  .dot.ok { background: #34d399; }
+</style>
+</head>
+<body>
+  <div class="card">
+    <svg class="mark" viewBox="0 0 64 64" aria-hidden="true">
+      <path d="M32 6C32 6 14 27 14 39a18 18 0 0 0 36 0C50 27 32 6 32 6Z" fill="#fff"/>
+      <circle cx="32" cy="40" r="9" fill="#00AEEF"/>
+      <path d="M8 52c4 6 10 8 14 6M56 52c-4 6-10 8-14 6" stroke="#00AEEF" stroke-width="4" stroke-linecap="round" fill="none"/>
+    </svg>
+    <div class="status">No internet connection</div>
+    <h1>You're offline</h1>
+    <p>BAYWASH Group needs a connection to load payslips, leave status and your dashboard data. Cached pages you already opened may still be available.</p>
+    <button onclick="location.reload()">Try again</button>
+    <div class="hint"><span class="dot" id="dot"></span><span id="label">Waiting for network…</span></div>
+  </div>
+  <script>
+    function check() {
+      fetch("/", { method: "HEAD", cache: "no-store" })
+        .then(function () { location.reload(); })
+        .catch(function () {
+          document.getElementById("dot").className = "dot";
+          document.getElementById("label").textContent = "Waiting for network…";
+        });
+    }
+    window.addEventListener("online", function () {
+      document.getElementById("dot").className = "dot ok";
+      document.getElementById("label").textContent = "Back online — reloading…";
+      setTimeout(check, 400);
+    });
+    setInterval(check, 5000);
+  </script>
+</body>
+</html>

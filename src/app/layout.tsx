@@ -4,6 +4,8 @@ import "./globals.css";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { ThemeProvider } from "@/components/theme-provider";
+import { ServiceWorkerRegistrar } from "@/components/service-worker-registrar";
+import { OfflineBanner } from "@/components/offline-banner";
 
 // Nunito — rounded, friendly geometric sans matching the flat-design reference
 const nunito = Nunito({
@@ -76,9 +78,11 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
+          <OfflineBanner />
           {children}
           <Toaster />
           <Sonner />
+          <ServiceWorkerRegistrar />
         </ThemeProvider>
       </body>
     </html>
