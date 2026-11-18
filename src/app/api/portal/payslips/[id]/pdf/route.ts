@@ -1,6 +1,9 @@
-// Download an employee's payslip as a branded PDF document.
+// Download the signed-in employee's payslip as a branded PDF document.
+// Ownership comes from the portal session token — an employee can only ever
+// fetch their own slips.
 import { db } from "@/lib/db";
 import { err } from "@/lib/api";
+import { authenticatePortal } from "@/lib/portal-auth";
 import { generatePayslipPdf, PayslipLine } from "@/lib/payslip-pdf";
 
 export const runtime = "nodejs";
@@ -11,14 +14,14 @@ type Ctx = { params: Promise<{ id: string }> };
 const money = (n: number) => `$${n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
 export async function GET(req: Request, ctx: Ctx) {
+  const auth = await authenticatePortal(req);
+  if (!auth) return err("Not signed in", 401);
+
   const { id } = await ctx.params;
-  const { searchParams } = new URL(req.url);
-  // Optional ownership check — employees can only fetch their own slips
-  const employeeId = searchParams.get("employeeId");
 
   const slip = await db.payslip.findUnique({ where: { id }, include: { employee: true } });
   if (!slip) return err("Payslip not found", 404);
-  if (employeeId && slip.employeeId !== employeeId) return err("Not allowed", 403);
+  if (slip.employeeId !== auth.employee.id) return err("Not allowed", 403);
 
   let lines: PayslipLine[] = [];
   try {

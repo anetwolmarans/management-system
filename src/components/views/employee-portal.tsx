@@ -53,6 +53,12 @@ interface PortalEmployee {
   status: string;
 }
 
+// Signed-in portal session: bearer token + the employee it belongs to.
+interface PortalSession {
+  token: string;
+  employee: PortalEmployee;
+}
+
 interface SlipLine {
   label: string;
   amount: number;
@@ -110,11 +116,33 @@ const LEAVE_TYPES = ["annual", "sick", "unpaid", "emergency", "maternity"];
 const initials = (name: string) =>
   name.split(" ").map((p) => p[0]).slice(0, 2).join("").toUpperCase();
 
+// Downloads a payslip PDF via the authenticated endpoint (token in header —
+// never in the URL) and saves it with the server-provided filename.
+async function downloadPdf(slipId: string, token: string, fallbackName = "payslip.pdf") {
+  const r = await fetch(`/api/portal/payslips/${slipId}/pdf`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (!r.ok) {
+    toast.error("Could not download the PDF");
+    return;
+  }
+  const blob = await r.blob();
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  const cd = r.headers.get("content-disposition") ?? "";
+  a.download = /filename="?([^";]+)"?/.exec(cd)?.[1] ?? fallbackName;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}
+
 // ============================================================
 // Main component
 // ============================================================
 export function EmployeePortal() {
-  const [session, setSession] = useState<PortalEmployee | null>(null);
+  const [session, setSession] = useState<PortalSession | null>(null);
   const [checking, setChecking] = useState(true);
   const [tab, setTab] = useState<Tab>("home");
   const [me, setMe] = useState<MeData | null>(null);
@@ -125,7 +153,7 @@ export function EmployeePortal() {
     Promise.resolve().then(() => {
       try {
         const raw = localStorage.getItem(SESSION_KEY);
-        if (raw) setSession(JSON.parse(raw) as PortalEmployee);
+        if (raw) setSession(JSON.parse(raw) as PortalSession);
       } catch {
         /* ignore corrupted session */
       }
@@ -133,28 +161,47 @@ export function EmployeePortal() {
     });
   }, []);
 
-  const loadMe = useCallback(async (employeeId: string) => {
-    setMeLoading(true);
-    try {
-      const r = await fetch(`/api/portal/me?employeeId=${employeeId}`);
-      if (!r.ok) throw new Error();
-      setMe(await r.json());
-    } catch {
-      toast.error("Could not load your details");
-    } finally {
-      setMeLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    if (session) Promise.resolve().then(() => loadMe(session.id));
-  }, [session, loadMe]);
-
-  const signOut = () => {
+  // Clears the session locally (no server call) — also used for expired tokens.
+  const forceSignOut = useCallback(() => {
     localStorage.removeItem(SESSION_KEY);
     setSession(null);
     setMe(null);
     setTab("home");
+  }, []);
+
+  const loadMe = useCallback(
+    async (token: string) => {
+      setMeLoading(true);
+      try {
+        const r = await fetch("/api/portal/me", { headers: { Authorization: `Bearer ${token}` } });
+        if (r.status === 401) {
+          forceSignOut();
+          toast.error("Session expired — please sign in again");
+          return;
+        }
+        if (!r.ok) throw new Error();
+        setMe(await r.json());
+      } catch {
+        toast.error("Could not load your details");
+      } finally {
+        setMeLoading(false);
+      }
+    },
+    [forceSignOut],
+  );
+
+  useEffect(() => {
+    if (session) Promise.resolve().then(() => loadMe(session.token));
+  }, [session, loadMe]);
+
+  const signOut = () => {
+    if (session?.token) {
+      fetch("/api/portal/logout", {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${session.token}` },
+      }).catch(() => undefined);
+    }
+    forceSignOut();
     toast.success("Signed out");
   };
 
@@ -167,13 +214,13 @@ export function EmployeePortal() {
   }
 
   if (!session) {
-    return <PortalLogin onSignedIn={(emp) => setSession(emp)} />;
+    return <PortalLogin onSignedIn={(s) => setSession(s)} />;
   }
 
   return (
     <div className="min-h-screen bg-muted/30 flex flex-col md:items-center">
       <div className="w-full md:max-w-md lg:max-w-lg min-h-screen md:min-h-0 md:my-6 md:rounded-3xl md:border md:shadow-xl flex flex-col bg-background overflow-hidden relative">
-        <PortalHeader employee={session} onSignOut={signOut} />
+        <PortalHeader employee={session.employee} onSignOut={signOut} />
 
         <main className="flex-1 p-4 pb-28">
           {meLoading && !me ? (
@@ -182,10 +229,10 @@ export function EmployeePortal() {
             </div>
           ) : (
             <>
-              {tab === "home" && <HomeTab me={me} session={session} onGoTab={setTab} />}
-              {tab === "payslips" && <PayslipsTab session={session} />}
-              {tab === "leave" && <LeaveTab session={session} onChanged={() => session && loadMe(session.id)} />}
-              {tab === "profile" && <ProfileTab session={session} me={me} onSignOut={signOut} />}
+              {tab === "home" && <HomeTab me={me} employee={session.employee} token={session.token} onGoTab={setTab} />}
+              {tab === "payslips" && <PayslipsTab token={session.token} />}
+              {tab === "leave" && <LeaveTab token={session.token} onChanged={() => session && loadMe(session.token)} />}
+              {tab === "profile" && <ProfileTab employee={session.employee} me={me} onSignOut={signOut} />}
             </>
           )}
         </main>
@@ -199,7 +246,7 @@ export function EmployeePortal() {
 // ============================================================
 // Login screen
 // ============================================================
-function PortalLogin({ onSignedIn }: { onSignedIn: (emp: PortalEmployee) => void }) {
+function PortalLogin({ onSignedIn }: { onSignedIn: (s: PortalSession) => void }) {
   const [identifier, setIdentifier] = useState("");
   const [pin, setPin] = useState("");
   const [busy, setBusy] = useState(false);
@@ -224,8 +271,8 @@ function PortalLogin({ onSignedIn }: { onSignedIn: (emp: PortalEmployee) => void
         return;
       }
       localStorage.setItem(SESSION_KEY, JSON.stringify(d));
-      toast.success(`Welcome, ${d.name.split(" ")[0]}`);
-      onSignedIn(d as PortalEmployee);
+      toast.success(`Welcome, ${d.employee.name.split(" ")[0]}`);
+      onSignedIn({ token: d.token, employee: d.employee as PortalEmployee });
     } catch {
       setError("Network error — please try again.");
     } finally {
@@ -408,7 +455,7 @@ function greeting() {
   return "Good evening";
 }
 
-function HomeTab({ me, session, onGoTab }: { me: MeData | null; session: PortalEmployee; onGoTab: (t: Tab) => void }) {
+function HomeTab({ me, employee, token, onGoTab }: { me: MeData | null; employee: PortalEmployee; token: string; onGoTab: (t: Tab) => void }) {
   if (!me) return <EmptyState icon={Loader2} title="Loading…" description="Fetching your latest details." />;
 
   const slip = me.latestPayslip;
@@ -419,8 +466,8 @@ function HomeTab({ me, session, onGoTab }: { me: MeData | null; session: PortalE
       <div className="hero-gradient rounded-2xl p-4 text-white relative overflow-hidden">
         <div className="absolute -top-8 -right-8 h-28 w-28 rounded-full bg-white/10" aria-hidden="true" />
         <p className="text-[11px] text-white/75 font-semibold uppercase tracking-[0.16em]">{greeting()}</p>
-        <p className="text-lg font-extrabold mt-0.5">{session.name}</p>
-        <p className="text-xs text-white/80 mt-0.5">{session.position} · {session.department}</p>
+        <p className="text-lg font-extrabold mt-0.5">{employee.name}</p>
+        <p className="text-xs text-white/80 mt-0.5">{employee.position} · {employee.department}</p>
       </div>
 
       {/* Latest payslip */}
@@ -437,10 +484,8 @@ function HomeTab({ me, session, onGoTab }: { me: MeData | null; session: PortalE
               Gross {fmtMoney(slip.gross)} · Deductions −{fmtMoney(slip.deductions)} · Issued {fmtDate(slip.issuedAt)}
             </p>
             <div className="flex gap-2 mt-3">
-              <Button asChild className="flex-1 h-9 gap-1.5 bg-[#00AEEF] text-[#01205E] hover:bg-[#00AEEF]/90 font-bold">
-                <a href={`/api/portal/payslips/${slip.id}/pdf?employeeId=${session.id}`} target="_blank" rel="noreferrer">
-                  <Download className="h-4 w-4" /> Download PDF
-                </a>
+              <Button onClick={() => downloadPdf(slip.id, token)} className="flex-1 h-9 gap-1.5 bg-[#00AEEF] text-[#01205E] hover:bg-[#00AEEF]/90 font-bold">
+                <Download className="h-4 w-4" /> Download PDF
               </Button>
               <Button variant="outline" className="h-9" onClick={() => onGoTab("payslips")}>
                 View all
@@ -534,7 +579,7 @@ function MiniStat({ icon: Icon, label, value, small }: { icon: typeof Home; labe
 // ============================================================
 // Payslips tab — query + download
 // ============================================================
-function PayslipsTab({ session }: { session: PortalEmployee }) {
+function PayslipsTab({ token }: { token: string }) {
   const [slips, setSlips] = useState<PortalSlip[]>([]);
   const [loading, setLoading] = useState(true);
   const [year, setYear] = useState("all");
@@ -548,10 +593,17 @@ function PayslipsTab({ session }: { session: PortalEmployee }) {
     return Array.from(set).sort((a, b) => b - a);
   }, [slips]);
 
-  const load = useCallback(async (employeeId: string, y: string, m: string, query: string) => {
+  const load = useCallback(async (token: string, y: string, m: string, query: string) => {
     setLoading(true);
     try {
-      const r = await fetch(`/api/portal/payslips?employeeId=${employeeId}&year=${y}&month=${m}&q=${encodeURIComponent(query)}`);
+      const r = await fetch(`/api/portal/payslips?year=${y}&month=${m}&q=${encodeURIComponent(query)}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (r.status === 401) {
+        localStorage.removeItem(SESSION_KEY);
+        location.reload();
+        return;
+      }
       const d = await r.json();
       setSlips(Array.isArray(d) ? d : []);
     } catch {
@@ -563,9 +615,9 @@ function PayslipsTab({ session }: { session: PortalEmployee }) {
 
   // Initial load + refetch when filters change (small debounce for the search box)
   useEffect(() => {
-    const t = setTimeout(() => Promise.resolve().then(() => load(session.id, year, month, q)), q ? 300 : 0);
+    const t = setTimeout(() => Promise.resolve().then(() => load(token, year, month, q)), q ? 300 : 0);
     return () => clearTimeout(t);
-  }, [session.id, year, month, q, load]);
+  }, [token, year, month, q, load]);
 
   return (
     <div className="space-y-4">
@@ -681,10 +733,8 @@ function PayslipsTab({ session }: { session: PortalEmployee }) {
                       <span className="font-extrabold">{fmtMoney(slip.net)}</span>
                     </div>
                     {slip.notes && <p className="text-[11px] italic text-muted-foreground">Note: {slip.notes}</p>}
-                    <Button asChild className="w-full h-9 gap-1.5 bg-[#00AEEF] text-[#01205E] hover:bg-[#00AEEF]/90 font-bold">
-                      <a href={`/api/portal/payslips/${slip.id}/pdf?employeeId=${session.id}`} target="_blank" rel="noreferrer">
-                        <Download className="h-4 w-4" /> Download PDF payslip
-                      </a>
+                    <Button onClick={() => downloadPdf(slip.id, token)} className="w-full h-9 gap-1.5 bg-[#00AEEF] text-[#01205E] hover:bg-[#00AEEF]/90 font-bold">
+                      <Download className="h-4 w-4" /> Download PDF payslip
                     </Button>
                   </div>
                 )}
@@ -700,7 +750,7 @@ function PayslipsTab({ session }: { session: PortalEmployee }) {
 // ============================================================
 // Leave tab — approval status + request leave
 // ============================================================
-function LeaveTab({ session, onChanged }: { session: PortalEmployee; onChanged: () => void }) {
+function LeaveTab({ token, onChanged }: { token: string; onChanged: () => void }) {
   const [leaves, setLeaves] = useState<LeaveRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [open, setOpen] = useState(false);
@@ -710,10 +760,12 @@ function LeaveTab({ session, onChanged }: { session: PortalEmployee; onChanged: 
   const [reason, setReason] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
-  const load = useCallback(async (employeeId: string) => {
+  const load = useCallback(async (token: string) => {
     setLoading(true);
     try {
-      const r = await fetch(`/api/portal/leave?employeeId=${employeeId}`);
+      const r = await fetch("/api/portal/leave", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
       const d = await r.json();
       setLeaves(Array.isArray(d) ? d : []);
     } catch {
@@ -724,8 +776,8 @@ function LeaveTab({ session, onChanged }: { session: PortalEmployee; onChanged: 
   }, []);
 
   useEffect(() => {
-    Promise.resolve().then(() => load(session.id));
-  }, [session.id, load]);
+    Promise.resolve().then(() => load(token));
+  }, [token, load]);
 
   const counts = {
     pending: leaves.filter((l) => l.status === "pending").length,
@@ -744,10 +796,10 @@ function LeaveTab({ session, onChanged }: { session: PortalEmployee; onChanged: 
     }
     setSubmitting(true);
     try {
-      const r = await fetch("/api/leave", {
+      const r = await fetch("/api/portal/leave", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ employeeId: session.id, type, startDate: start, endDate: end, reason: reason.trim() }),
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ type, startDate: start, endDate: end, reason: reason.trim() }),
       });
       const d = await r.json();
       if (!r.ok) throw new Error(d.error);
@@ -756,7 +808,7 @@ function LeaveTab({ session, onChanged }: { session: PortalEmployee; onChanged: 
       setReason("");
       setStart("");
       setEnd("");
-      await load(session.id);
+      await load(token);
       onChanged();
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Failed to submit request");
@@ -868,7 +920,7 @@ function LeaveTab({ session, onChanged }: { session: PortalEmployee; onChanged: 
 // ============================================================
 // Profile tab
 // ============================================================
-function ProfileTab({ session, me, onSignOut }: { session: PortalEmployee; me: MeData | null; onSignOut: () => void }) {
+function ProfileTab({ employee, me, onSignOut }: { employee: PortalEmployee; me: MeData | null; onSignOut: () => void }) {
   return (
     <div className="space-y-4">
       {/* Identity card */}
@@ -876,14 +928,14 @@ function ProfileTab({ session, me, onSignOut }: { session: PortalEmployee; me: M
         <CardContent className="p-4">
           <div className="flex items-center gap-3">
             <div className="h-14 w-14 rounded-2xl bg-[#01205E] text-white flex items-center justify-center text-lg font-extrabold shrink-0">
-              {initials(session.name)}
+              {initials(employee.name)}
             </div>
             <div className="min-w-0">
-              <p className="font-extrabold text-[15px] leading-tight">{session.name}</p>
-              <p className="text-xs text-muted-foreground mt-0.5">{session.position}</p>
+              <p className="font-extrabold text-[15px] leading-tight">{employee.name}</p>
+              <p className="text-xs text-muted-foreground mt-0.5">{employee.position}</p>
               <div className="flex items-center gap-1.5 mt-1.5">
-                <StatusBadge status={session.status} />
-                <span className="text-[10px] font-mono text-muted-foreground">{session.employeeNo}</span>
+                <StatusBadge status={employee.status} />
+                <span className="text-[10px] font-mono text-muted-foreground">{employee.employeeNo}</span>
               </div>
             </div>
           </div>
@@ -894,11 +946,11 @@ function ProfileTab({ session, me, onSignOut }: { session: PortalEmployee; me: M
       <Card>
         <CardContent className="p-4">
           <p className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground mb-1.5">Personal info</p>
-          <InfoRow label="Email" value={session.email} />
-          <InfoRow label="Phone" value={session.phone ?? "—"} />
-          <InfoRow label="Department" value={session.department} />
-          <InfoRow label="Date joined" value={fmtDate(session.hireDate)} />
-          <InfoRow label="Base salary" value={`${fmtMoney(session.salary)} / month`} />
+          <InfoRow label="Email" value={employee.email} />
+          <InfoRow label="Phone" value={employee.phone ?? "—"} />
+          <InfoRow label="Department" value={employee.department} />
+          <InfoRow label="Date joined" value={fmtDate(employee.hireDate)} />
+          <InfoRow label="Base salary" value={`${fmtMoney(employee.salary)} / month`} />
           {me && <InfoRow label="Annual leave allowance" value={`${me.stats.annualAllowance} days`} />}
         </CardContent>
       </Card>

@@ -35,6 +35,7 @@ model Employee {
   services       ServiceRecord[]      @relation("ServiceMechanic")
   reports        WeeklyReport[]       @relation("ReportAuthor")
   payslips       Payslip[]
+  portalSessions PortalSession[]
 }
 
 model Timesheet {
@@ -261,7 +262,7 @@ model Sheet {
   updatedAt   DateTime @updatedAt
 }
 
-// Monthly payslip issued by payroll — visible to the employee in the BAYWASH app.
+// Monthly payslip issued by payroll — visible to the employee in the Employee App.
 // items: JSON [{ label, amount, kind: "earning" | "deduction" }]
 model Payslip {
   id           String   @id @default(cuid())
@@ -299,4 +300,18 @@ model FormSubmission {
   createdBy String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+// Server-side session for the Employee App — the portal client presents this
+// token as `Authorization: Bearer <token>`; all portal data is scoped to it.
+model PortalSession {
+  id         String   @id @default(cuid())
+  token      String   @unique
+  employeeId String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+
+  employee Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+
+  @@index([employeeId])
 }

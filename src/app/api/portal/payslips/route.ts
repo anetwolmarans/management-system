@@ -1,13 +1,17 @@
 // Employee-app payslip list with query filters (year / month / search).
+// Scoped to the signed-in employee via the portal session token.
 import { db } from "@/lib/db";
 import { json, err } from "@/lib/api";
+import { authenticatePortal } from "@/lib/portal-auth";
 
 export const dynamic = "force-dynamic";
 
 export async function GET(req: Request) {
+  const auth = await authenticatePortal(req);
+  if (!auth) return err("Not signed in", 401);
+  const employeeId = auth.employee.id;
+
   const { searchParams } = new URL(req.url);
-  const employeeId = searchParams.get("employeeId") ?? "";
-  if (!employeeId) return err("employeeId is required", 422);
 
   const year = searchParams.get("year");
   const month = searchParams.get("month");

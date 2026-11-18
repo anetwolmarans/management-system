@@ -1,13 +1,15 @@
 // Employee-app home summary — profile, latest payslip, leave status.
+// Scoped to the signed-in employee via the portal session token.
 import { db } from "@/lib/db";
 import { json, err } from "@/lib/api";
+import { authenticatePortal } from "@/lib/portal-auth";
 
 export const dynamic = "force-dynamic";
 
 export async function GET(req: Request) {
-  const { searchParams } = new URL(req.url);
-  const employeeId = searchParams.get("employeeId") ?? "";
-  if (!employeeId) return err("employeeId is required", 422);
+  const auth = await authenticatePortal(req);
+  if (!auth) return err("Not signed in", 401);
+  const employeeId = auth.employee.id;
 
   const employee = await db.employee.findUnique({
     where: { id: employeeId },
