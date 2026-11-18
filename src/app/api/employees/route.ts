@@ -34,7 +34,7 @@ export async function POST(req: Request) {
   let employeeNo = body.employeeNo as string | undefined;
   if (!employeeNo) {
     const count = await db.employee.count();
-    employeeNo = `WH-${String(1001 + count).padStart(4, "0")}`;
+    employeeNo = `MS-${String(1001 + count).padStart(4, "0")}`;
   }
 
   try {

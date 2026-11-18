@@ -74,11 +74,11 @@ const TEMPLATE_ICONS: Record<string, React.ComponentType<{ className?: string }>
 };
 
 const TEMPLATE_NOTES: Record<string, string> = {
-  "incident-report": "Damage or incident involving a customer vehicle — MANAGEMENT SYSTEM · CAR WASH",
+  "incident-report": "Damage or incident involving a customer or property — MANAGEMENT SYSTEM",
   "accident-report": "Company vehicle accident report for insurance — MANAGEMENT SYSTEM",
   "customer-complaint": "Client complaint intake & resolution record — MANAGEMENT SYSTEM",
-  "customer-notification": "Formal notification to a client — MANAGEMENT SYSTEM · CLEANING",
-  "leave-application": "Multi-type leave application with payments — MANAGEMENT SYSTEM · CLEANING",
+  "customer-notification": "Formal notification to a client — MANAGEMENT SYSTEM",
+  "leave-application": "Multi-type leave application with payments — MANAGEMENT SYSTEM",
 };
 
 export function FormsView() {

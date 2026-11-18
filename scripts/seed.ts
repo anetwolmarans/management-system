@@ -501,7 +501,7 @@ async function main() {
   }
 
   // ---------- Daily Factory Reports (multi-site operational reports) ----------
-  // Modeled on the MANAGEMENT SYSTEM · CLEANING daily factory report format.
+  // Modeled on the MANAGEMENT SYSTEM daily factory report format.
   const factoryReportSections = [
     {
       id: "s1",
@@ -579,7 +579,7 @@ async function main() {
     data: {
       title: "Daily Factory Report — 24 June 2026",
       reportDate: new Date("2026-06-24"),
-      company: "MANAGEMENT SYSTEM · CLEANING",
+      company: "MANAGEMENT SYSTEM",
       frequency: "DAILY",
       compiledBy: "FRANS AND COETZEE",
       compiledFor: "OPERATIONS TEAM",
@@ -594,7 +594,7 @@ async function main() {
     data: {
       title: "Daily Factory Report — 23 June 2026",
       reportDate: new Date("2026-06-23"),
-      company: "MANAGEMENT SYSTEM · CLEANING",
+      company: "MANAGEMENT SYSTEM",
       frequency: "DAILY",
       compiledBy: "FRANS",
       compiledFor: "OPERATIONS TEAM",
@@ -622,7 +622,7 @@ async function main() {
     data: {
       title: "Daily Factory Report — 22 June 2026",
       reportDate: new Date("2026-06-22"),
-      company: "MANAGEMENT SYSTEM · CLEANING",
+      company: "MANAGEMENT SYSTEM",
       frequency: "DAILY",
       compiledBy: "COETZEE",
       compiledFor: "OPERATIONS TEAM",

@@ -78,16 +78,16 @@ export type FormData = Record<string, FormDataValue>;
 const NAVY = "#01205E";
 
 // ------------------------------------------------------------
-// 1. MS-CW-IR-01 — Incident Report Form (MANAGEMENT SYSTEM · CAR WASH)
+// 1. MS-IR-01 — Incident Report Form (MANAGEMENT SYSTEM)
 // ------------------------------------------------------------
 const incidentReport: FormTemplate = {
   id: "incident-report",
-  docId: "MS-CW-IR-01",
+  docId: "MS-IR-01",
   title: "Incident Report Form",
-  company: "MANAGEMENT SYSTEM · CAR WASH",
+  company: "MANAGEMENT SYSTEM",
   meta: [
     { label: "REV/DATE", value: "19/07/2024" },
-    { label: "DOC. NAME", value: "MS-CW-IR-01" },
+    { label: "DOC. NAME", value: "MS-IR-01" },
     { label: "REVIEW DATE", value: "19/07/2024" },
     { label: "REVIEW NR", value: "00" },
     { label: "CREATED BY", value: "DIRK BOSMAN" },
@@ -118,7 +118,7 @@ const incidentReport: FormTemplate = {
     },
   ],
   signBlocks: [
-    { leftLabel: "Signature of Manager", rightLabel: "Signature of Car Wash", withDate: true },
+    { leftLabel: "Signature of Manager", rightLabel: "Signature of Supervisor", withDate: true },
   ],
 };
 
@@ -255,14 +255,14 @@ const customerComplaint: FormTemplate = {
 };
 
 // ------------------------------------------------------------
-// 4. MS-CNF-2024 — Customer Notification Form (MANAGEMENT SYSTEM · CLEANING)
+// 4. MS-CNF-2024 — Customer Notification Form (MANAGEMENT SYSTEM)
 // ------------------------------------------------------------
 const customerNotification: FormTemplate = {
   id: "customer-notification",
   docId: "MS-CNF-2024",
   docIdLabel: "DOC. NO",
   title: "Customer Notification Form",
-  company: "MANAGEMENT SYSTEM · CLEANING",
+  company: "MANAGEMENT SYSTEM",
   meta: [
     { label: "REV/DATE", value: "09.07.2023" },
     { label: "DOC. NO", value: "MS-CNF-2024" },
@@ -322,7 +322,7 @@ const customerNotification: FormTemplate = {
 };
 
 // ------------------------------------------------------------
-// 5. MS-MLAF-01 — Multi Leave Application Form (MANAGEMENT SYSTEM · CLEANING)
+// 5. MS-MLAF-01 — Multi Leave Application Form (MANAGEMENT SYSTEM)
 // ------------------------------------------------------------
 export interface LeaveRowDef {
   no: number;
@@ -346,7 +346,7 @@ const leaveApplication: FormTemplate = {
   id: "leave-application",
   docId: "MS-MLAF-01",
   title: "Multi Leave Application Form",
-  company: "MANAGEMENT SYSTEM · CLEANING",
+  company: "MANAGEMENT SYSTEM",
   meta: [
     { label: "REV/DATE", value: "06/04/2021" },
     { label: "DOC. NAME", value: "MS-MLAF-01" },

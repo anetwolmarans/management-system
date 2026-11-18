@@ -19,8 +19,9 @@ import { Badge } from "@/components/ui/badge";
 import {
   Truck, Plus, Fuel, Route, Wrench, Gauge, MapPin, Calendar, FileCheck, ClipboardList,
   History, Bell, CheckCircle2, AlertTriangle, XCircle, DollarSign, Settings, Package,
-  RefreshCw, Eye, Pencil,
+  RefreshCw, Eye, Pencil, Upload,
 } from "lucide-react";
+import { BulkUploadDialog, type BulkColumn } from "@/components/bulk-upload-dialog";
 import { toast } from "sonner";
 
 // ---------- Types ----------
@@ -135,6 +136,25 @@ const INSPECTION_CHECKLIST = [
 const fmt = (n: number) => `$${n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 const fmtDate = (s?: string | null) => s ? new Date(s).toLocaleDateString() : "—";
 
+const VEHICLE_COLUMNS: BulkColumn[] = [
+  { key: "plateNumber", label: "Plate Number", required: true },
+  { key: "brand", label: "Brand", required: true },
+  { key: "model", label: "Model" },
+  { key: "year", label: "Year", default: new Date().getFullYear() },
+  { key: "type", label: "Type (car/van/truck/motorcycle)", default: "car" },
+  { key: "status", label: "Status", default: "active" },
+  { key: "assignedTo", label: "Assigned To" },
+  { key: "mileage", label: "Mileage", default: 0 },
+  { key: "fuelLevel", label: "Fuel Level (0-100)", default: 100 },
+  { key: "vin", label: "VIN" },
+  { key: "color", label: "Color" },
+  { key: "purchasePrice", label: "Purchase Price" },
+  { key: "purchaseDate", label: "Purchase Date (YYYY-MM-DD)" },
+  { key: "supplier", label: "Supplier" },
+  { key: "insuranceExpiry", label: "Insurance Expiry (YYYY-MM-DD)" },
+  { key: "registrationExpiry", label: "Registration Expiry (YYYY-MM-DD)" },
+];
+
 // ============================================================
 // Main FleetView
 // ============================================================
@@ -147,6 +167,7 @@ export function FleetView() {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<string>("vehicles");
   const [vehicleDialogOpen, setVehicleDialogOpen] = useState(false);
+  const [bulkVehicleOpen, setBulkVehicleOpen] = useState(false);
   const [inspectionDialogOpen, setInspectionDialogOpen] = useState(false);
   const [serviceDialogOpen, setServiceDialogOpen] = useState(false);
   const [scheduleDialogOpen, setScheduleDialogOpen] = useState(false);
@@ -192,6 +213,9 @@ export function FleetView() {
         description="Vehicles, weekly driver inspections, service history & maintenance schedule with auto-flagging."
         actions={
           <>
+            <Button size="sm" variant="outline" onClick={() => setBulkVehicleOpen(true)}>
+              <Upload className="h-4 w-4 mr-1" /> Bulk Upload
+            </Button>
             <Button size="sm" variant="outline" onClick={() => { setEditingVehicle(null); setVehicleDialogOpen(true); }}>
               <Plus className="h-4 w-4 mr-1" /> Vehicle
             </Button>
@@ -203,6 +227,16 @@ export function FleetView() {
             </Button>
           </>
         }
+      />
+
+      <BulkUploadDialog
+        open={bulkVehicleOpen}
+        onOpenChange={setBulkVehicleOpen}
+        title="Bulk upload vehicles"
+        description="Upload a CSV of vehicles to create them all at once. Plate numbers must be unique."
+        endpoint="/api/fleet/vehicles/bulk"
+        columns={VEHICLE_COLUMNS}
+        onDone={load}
       />
 
       {/* KPI Strip */}

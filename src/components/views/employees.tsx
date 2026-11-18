@@ -12,8 +12,9 @@ import {
   Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger,
 } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Plus, Search, Users, Trash2, Pencil, Mail, Phone, Briefcase } from "lucide-react";
+import { Plus, Search, Users, Trash2, Pencil, Mail, Phone, Briefcase, Upload } from "lucide-react";
 import { toast } from "sonner";
+import { BulkUploadDialog, type BulkColumn } from "@/components/bulk-upload-dialog";
 
 interface Employee {
   id: string;
@@ -31,6 +32,18 @@ interface Employee {
 const DEPARTMENTS = ["Operations", "Sales", "Logistics", "HR", "Finance", "Engineering"];
 const STATUSES = ["active", "on-leave", "suspended", "terminated"];
 
+const EMPLOYEE_COLUMNS: BulkColumn[] = [
+  { key: "name", label: "Name", required: true },
+  { key: "email", label: "Email", required: true },
+  { key: "phone", label: "Phone" },
+  { key: "position", label: "Position", default: "Staff" },
+  { key: "department", label: "Department", default: "Operations" },
+  { key: "employeeNo", label: "Employee No (blank=auto)" },
+  { key: "hireDate", label: "Hire Date (YYYY-MM-DD)" },
+  { key: "salary", label: "Salary", default: 0 },
+  { key: "status", label: "Status", default: "active" },
+];
+
 export function EmployeesView() {
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [loading, setLoading] = useState(true);
@@ -38,6 +51,7 @@ export function EmployeesView() {
   const [dept, setDept] = useState("all");
   const [status, setStatus] = useState("all");
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [bulkOpen, setBulkOpen] = useState(false);
   const [editing, setEditing] = useState<Employee | null>(null);
   const [form, setForm] = useState<Partial<Employee>>({});
 
@@ -113,9 +127,14 @@ export function EmployeesView() {
         title="Employees"
         description="Directory of all staff — search, filter, add and edit profiles."
         actions={
-          <Button size="sm" onClick={openAdd}>
-            <Plus className="h-4 w-4 mr-1" /> Add Employee
-          </Button>
+          <div className="flex gap-2">
+            <Button size="sm" variant="outline" onClick={() => setBulkOpen(true)}>
+              <Upload className="h-4 w-4 mr-1" /> Bulk Upload
+            </Button>
+            <Button size="sm" onClick={openAdd}>
+              <Plus className="h-4 w-4 mr-1" /> Add Employee
+            </Button>
+          </div>
         }
       />
 
@@ -311,6 +330,16 @@ export function EmployeesView() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <BulkUploadDialog
+        open={bulkOpen}
+        onOpenChange={setBulkOpen}
+        title="Bulk upload employees"
+        description="Upload a CSV of staff to create them all at once. Leave Employee No blank to auto-generate MS-####."
+        endpoint="/api/employees/bulk"
+        columns={EMPLOYEE_COLUMNS}
+        onDone={load}
+      />
     </div>
   );
 }
