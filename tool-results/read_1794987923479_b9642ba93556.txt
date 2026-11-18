@@ -1,0 +1,782 @@
+     1→// Seed script — populate the database with realistic sample data for demo.
+     2→import { db } from "../src/lib/db";
+     3→
+     4→async function main() {
+     5→  // Wipe existing data so re-seeding is idempotent.
+     6→  await db.factoryReport.deleteMany();
+     7→  await db.maintenanceSchedule.deleteMany();
+     8→  await db.serviceRecord.deleteMany();
+     9→  await db.vehicleInspection.deleteMany();
+    10→  await db.setting.deleteMany();
+    11→  await db.sheet.deleteMany();
+    12→  await db.formSubmission.deleteMany();
+    13→  await db.weeklyReport.deleteMany();
+    14→  await db.fleetLog.deleteMany();
+    15→  await db.vehicle.deleteMany();
+    16→  await db.loan.deleteMany();
+    17→  await db.complaint.deleteMany();
+    18→  await db.leaveRequest.deleteMany();
+    19→  await db.timesheet.deleteMany();
+    20→  await db.employee.deleteMany();
+    21→
+    22→  // ---------- Employees ----------
+    23→  const employees = [
+    24→    { name: "Sarah Chen", email: "sarah.chen@baywashgroup.com", phone: "+1 555 0101", position: "Operations Manager", department: "Operations", salary: 8200 },
+    25→    { name: "Marcus Reyes", email: "marcus.reyes@baywashgroup.com", phone: "+1 555 0102", position: "Driver", department: "Logistics", salary: 3400 },
+    26→    { name: "Priya Patel", email: "priya.patel@baywashgroup.com", phone: "+1 555 0103", position: "Sales Rep", department: "Sales", salary: 4200 },
+    27→    { name: "David Okafor", email: "david.okafor@baywashgroup.com", phone: "+1 555 0104", position: "Field Technician", department: "Engineering", salary: 5100 },
+    28→    { name: "Emma Lindqvist", email: "emma.l@baywashgroup.com", phone: "+1 555 0105", position: "HR Specialist", department: "HR", salary: 4800 },
+    29→    { name: "Tom Bradley", email: "tom.bradley@baywashgroup.com", phone: "+1 555 0106", position: "Driver", department: "Logistics", salary: 3300 },
+    30→    { name: "Lena Fischer", email: "lena.fischer@baywashgroup.com", phone: "+1 555 0107", position: "Accountant", department: "Finance", salary: 5600 },
+    31→    { name: "Carlos Mendoza", email: "carlos.m@baywashgroup.com", phone: "+1 555 0108", position: "Dispatcher", department: "Operations", salary: 3900 },
+    32→    { name: "Aisha Khan", email: "aisha.khan@baywashgroup.com", phone: "+1 555 0109", position: "Sales Rep", department: "Sales", salary: 4400 },
+    33→    { name: "Robert Liu", email: "robert.liu@baywashgroup.com", phone: "+1 555 0110", position: "Engineer", department: "Engineering", salary: 7200 },
+    34→    { name: "Nina Petrova", email: "nina.p@baywashgroup.com", phone: "+1 555 0111", position: "Driver", department: "Logistics", salary: 3350 },
+    35→    { name: "James O'Brien", email: "james.ob@baywashgroup.com", phone: "+1 555 0112", position: "Field Technician", department: "Engineering", salary: 4950 },
+    36→  ];
+    37→
+    38→  const createdEmployees = [];
+    39→  for (let i = 0; i < employees.length; i++) {
+    40→    const e = employees[i];
+    41→    const emp = await db.employee.create({
+    42→      data: {
+    43→        employeeNo: `BW-${String(1001 + i).padStart(4, "0")}`,
+    44→        name: e.name,
+    45→        email: e.email,
+    46→        phone: e.phone,
+    47→        position: e.position,
+    48→        department: e.department,
+    49→        hireDate: new Date(2021, (i * 3) % 12, (i * 7) % 28 + 1),
+    50→        salary: e.salary,
+    51→        status: i === 11 ? "on-leave" : "active",
+    52→        avatar: null,
+    53→      },
+    54→    });
+    55→    createdEmployees.push(emp);
+    56→  }
+    57→
+    58→  // ---------- Timesheets (last 7 days) ----------
+    59→  const today = new Date();
+    60→  for (let d = 6; d >= 0; d--) {
+    61→    const day = new Date(today);
+    62→    day.setDate(today.getDate() - d);
+    63→    if (day.getDay() === 0) continue;
+    64→    for (const emp of createdEmployees) {
+    65→      if (emp.status !== "active") continue;
+    66→      if (Math.random() < 0.2) continue;
+    67→      const inH = 8 + Math.floor(Math.random() * 2);
+    68→      const inM = Math.floor(Math.random() * 30);
+    69→      const clockIn = new Date(day);
+    70→      clockIn.setHours(inH, inM, 0, 0);
+    71→      const outH = 17 + Math.floor(Math.random() * 2);
+    72→      const outM = Math.floor(Math.random() * 45);
+    73→      const clockOut = new Date(day);
+    74→      clockOut.setHours(outH, outM, 0, 0);
+    75→      const hours = (clockOut.getTime() - clockIn.getTime()) / 3600000 - 0.5;
+    76→      await db.timesheet.create({
+    77→        data: {
+    78→          employeeId: emp.id,
+    79→          date: day,
+    80→          clockIn,
+    81→          clockOut,
+    82→          breakMin: 30,
+    83→          hours: Math.round(hours * 100) / 100,
+    84→          status: d === 0 ? "pending" : Math.random() < 0.9 ? "approved" : "pending",
+    85→        },
+    86→      });
+    87→    }
+    88→  }
+    89→
+    90→  // ---------- Leave Requests ----------
+    91→  const leaveTypes = ["annual", "sick", "unpaid", "emergency", "maternity"];
+    92→  for (let i = 0; i < 8; i++) {
+    93→    const emp = createdEmployees[i % createdEmployees.length];
+    94→    const start = new Date(today);
+    95→    start.setDate(today.getDate() + (i - 4) * 3);
+    96→    const end = new Date(start);
+    97→    end.setDate(start.getDate() + (i % 3) + 1);
+    98→    const days = Math.max(1, Math.round((end.getTime() - start.getTime()) / 86400000) + 1);
+    99→    await db.leaveRequest.create({
+   100→      data: {
+   101→        employeeId: emp.id,
+   102→        type: leaveTypes[i % leaveTypes.length],
+   103→        startDate: start,
+   104→        endDate: end,
+   105→        days,
+   106→        reason: ["Family vacation", "Medical appointment", "Personal matter", "Childcare", "Recovery"][i % 5],
+   107→        status: i < 3 ? "pending" : i < 6 ? "approved" : "rejected",
+   108→      },
+   109→    });
+   110→  }
+   111→
+   112→  // ---------- Complaints ----------
+   113→  const complaintTemplates = [
+   114→    { title: "Late salary deposit", category: "payment", priority: "high", description: "Salary for last month arrived 5 days late, causing financial strain." },
+   115→    { title: "Forklift safety concern in warehouse B", category: "safety", priority: "critical", description: "The forklift in warehouse B has faulty brakes — near-miss incident reported yesterday." },
+   116→    { title: "Workload imbalance in dispatch", category: "workload", priority: "medium", description: "Night shift dispatch handles 60% more tickets than day shift with same headcount." },
+   117→    { title: "Inappropriate comment from coworker", category: "harassment", priority: "high", description: "Repeated inappropriate remarks during team meetings despite verbal warnings." },
+   118→    { title: "Outdated laptops for engineering team", category: "equipment", priority: "low", description: "Engineering team laptops are 4+ years old, slowing down compile times significantly." },
+   119→    { title: "Missing PPE at site C", category: "safety", priority: "high", description: "Hard hats and high-vis vests are out of stock at site C storage room." },
+   120→    { title: "Confusing expense reimbursement process", category: "other", priority: "low", description: "The expense form has 12 fields and three approval steps — too complex." },
+   121→  ];
+   122→  for (let i = 0; i < complaintTemplates.length; i++) {
+   123→    const t = complaintTemplates[i];
+   124→    const emp = createdEmployees[i % createdEmployees.length];
+   125→    const created = new Date(today);
+   126→    created.setDate(today.getDate() - (i + 1) * 2);
+   127→    const isResolved = i >= 4;
+   128→    await db.complaint.create({
+   129→      data: {
+   130→        employeeId: emp.id,
+   131→        title: t.title,
+   132→        description: t.description,
+   133→        category: t.category,
+   134→        priority: t.priority,
+   135→        status: isResolved ? "resolved" : i < 2 ? "investigating" : "open",
+   136→        resolution: isResolved ? "Issue addressed — corrective action taken and documented in HR file." : null,
+   137→        createdAt: created,
+   138→        resolvedAt: isResolved ? new Date(created.getTime() + 86400000 * 2) : null,
+   139→      },
+   140→    });
+   141→  }
+   142→
+   143→  // ---------- Loans ----------
+   144→  const loanTerms = [6, 12, 12, 24, 6, 12];
+   145→  for (let i = 0; i < 6; i++) {
+   146→    const emp = createdEmployees[i];
+   147→    const principal = [3000, 5000, 2500, 8000, 1500, 6000][i];
+   148→    const termMonths = loanTerms[i];
+   149→    const interestRate = 0.05;
+   150→    const monthlyPayment = (principal * (1 + interestRate)) / termMonths;
+   151→    const paidMonths = Math.floor(Math.random() * (termMonths - 1)) + 1;
+   152→    const balance = Math.round((monthlyPayment * (termMonths - paidMonths)) * 100) / 100;
+   153→    const issued = new Date(today);
+   154→    issued.setMonth(today.getMonth() - paidMonths);
+   155→    await db.loan.create({
+   156→      data: {
+   157→        employeeId: emp.id,
+   158→        principal,
+   159→        interestRate,
+   160→        termMonths,
+   161→        monthlyPayment: Math.round(monthlyPayment * 100) / 100,
+   162→        balance,
+   163→        status: balance <= 0 ? "paid" : "active",
+   164→        issuedAt: issued,
+   165→      },
+   166→    });
+   167→  }
+   168→
+   169→  // ---------- Vehicles (with purchase data) ----------
+   170→  const vehicles = [
+   171→    { plateNumber: "BW-101-A", brand: "Ford", model: "Transit", year: 2022, type: "van", assignedTo: "Marcus Reyes", mileage: 48230, fuelLevel: 75,
+   172→      vin: "1FTBR1X8XNKA12345", purchasePrice: 42000, purchaseDate: new Date(2022, 2, 14), supplier: "City Ford Dealership", color: "White",
+   173→      insuranceExpiry: new Date(2027, 2, 14), registrationExpiry: new Date(2027, 5, 30) },
+   174→    { plateNumber: "BW-102-B", brand: "Mercedes", model: "Sprinter", year: 2023, type: "van", assignedTo: "Tom Bradley", mileage: 21340, fuelLevel: 60,
+   175→      vin: "WD3PE8CC8P5123456", purchasePrice: 58000, purchaseDate: new Date(2023, 5, 1), supplier: "Star Motors", color: "Silver",
+   176→      insuranceExpiry: new Date(2027, 5, 1), registrationExpiry: new Date(2027, 8, 15) },
+   177→    { plateNumber: "BW-103-C", brand: "Isuzu", model: "NPR", year: 2021, type: "truck", assignedTo: null, mileage: 92110, fuelLevel: 40,
+   178→      vin: "JALCD58R670012345", purchasePrice: 78000, purchaseDate: new Date(2021, 0, 20), supplier: "TruckZone Commercial", color: "Yellow",
+   179→      insuranceExpiry: new Date(2026, 11, 1), registrationExpiry: new Date(2027, 0, 20) },
+   180→    { plateNumber: "BW-104-D", brand: "Toyota", model: "Hilux", year: 2024, type: "truck", assignedTo: "Nina Petrova", mileage: 8900, fuelLevel: 90,
+   181→      vin: "AHTKB8CD403123456", purchasePrice: 46000, purchaseDate: new Date(2024, 1, 10), supplier: "Toyota Eastgate", color: "Graphite",
+   182→      insuranceExpiry: new Date(2028, 1, 10), registrationExpiry: new Date(2028, 1, 10) },
+   183→    { plateNumber: "BW-105-E", brand: "Volkswagen", model: "Caddy", year: 2020, type: "van", assignedTo: null, mileage: 124500, fuelLevel: 25,
+   184→      vin: "WVWZZZ2KZAW012345", purchasePrice: 28000, purchaseDate: new Date(2020, 4, 22), supplier: "VW Fleet Sales", color: "Blue",
+   185→      insuranceExpiry: new Date(2026, 9, 22), registrationExpiry: new Date(2026, 11, 30) },
+   186→    { plateNumber: "BW-106-F", brand: "Honda", model: "PCX", year: 2023, type: "motorcycle", assignedTo: "Carlos Mendoza", mileage: 5600, fuelLevel: 80,
+   187→      vin: "JH2MF6500PK001234", purchasePrice: 4800, purchaseDate: new Date(2023, 7, 5), supplier: "Rider Honda", color: "Red",
+   188→      insuranceExpiry: new Date(2027, 7, 5), registrationExpiry: new Date(2027, 7, 5) },
+   189→    { plateNumber: "BW-107-G", brand: "Ford", model: "Ranger", year: 2022, type: "truck", assignedTo: "James O'Brien", mileage: 31200, fuelLevel: 55,
+   190→      vin: "1FTYR14C9NKA12345", purchasePrice: 51000, purchaseDate: new Date(2022, 8, 12), supplier: "City Ford Dealership", color: "Black",
+   191→      insuranceExpiry: new Date(2027, 8, 12), registrationExpiry: new Date(2027, 8, 12) },
+   192→  ];
+   193→  const createdVehicles = [];
+   194→  for (const v of vehicles) {
+   195→    const veh = await db.vehicle.create({
+   196→      data: {
+   197→        plateNumber: v.plateNumber,
+   198→        brand: v.brand,
+   199→        model: v.model,
+   200→        year: v.year,
+   201→        type: v.type,
+   202→        status: v.fuelLevel < 30 ? "maintenance" : "active",
+   203→        assignedTo: v.assignedTo,
+   204→        mileage: v.mileage,
+   205→        fuelLevel: v.fuelLevel,
+   206→        vin: v.vin,
+   207→        purchasePrice: v.purchasePrice,
+   208→        purchaseDate: v.purchaseDate,
+   209→        supplier: v.supplier,
+   210→        color: v.color,
+   211→        insuranceExpiry: v.insuranceExpiry,
+   212→        registrationExpiry: v.registrationExpiry,
+   213→      },
+   214→    });
+   215→    createdVehicles.push(veh);
+   216→  }
+   217→
+   218→  // ---------- Fleet Logs (last 14 days) ----------
+   219→  const purposes = ["Delivery run", "Customer visit", "Equipment transport", "Site inspection", "Maintenance trip", "Fuel top-up"];
+   220→  const driverMap: Record<string, string> = {};
+   221→  createdVehicles.forEach((v, idx) => {
+   222→    driverMap[v.id] = createdEmployees[idx % createdEmployees.length].id;
+   223→  });
+   224→  for (let d = 13; d >= 0; d--) {
+   225→    const day = new Date(today);
+   226→    day.setDate(today.getDate() - d);
+   227→    if (day.getDay() === 0) continue;
+   228→    for (const veh of createdVehicles) {
+   229→      if (Math.random() < 0.3) continue;
+   230→      const startOdo = veh.mileage - Math.floor(Math.random() * 200);
+   231→      const distance = 20 + Math.floor(Math.random() * 180);
+   232→      const endOdo = startOdo + distance;
+   233→      await db.fleetLog.create({
+   234→        data: {
+   235→          vehicleId: veh.id,
+   236→          employeeId: driverMap[veh.id],
+   237→          date: day,
+   238→          startOdometer: startOdo,
+   239→          endOdometer: endOdo,
+   240→          distance,
+   241→          fuelCost: Math.round((distance * 0.12) * 100) / 100,
+   242→          purpose: purposes[Math.floor(Math.random() * purposes.length)],
+   243→        },
+   244→      });
+   245→    }
+   246→  }
+   247→
+   248→  // ---------- Weekly Driver Inspections ----------
+   249→  // Standard checklist used for every inspection
+   250→  const inspectionChecklistTemplate = [
+   251→    { id: "tires", name: "Tires & tread" },
+   252→    { id: "brakes", name: "Brakes" },
+   253→    { id: "lights", name: "Lights (head/tail/indicators)" },
+   254→    { id: "fluids", name: "Fluid levels (oil/coolant/brake)" },
+   255→    { id: "wipers", name: "Wipers & washers" },
+   256→    { id: "body", name: "Body & mirrors" },
+   257→    { id: "seatbelts", name: "Seatbelts" },
+   258→    { id: "horn", name: "Horn" },
+   259→    { id: "exhaust", name: "Exhaust / emissions" },
+   260→    { id: "steering", name: "Steering & suspension" },
+   261→  ];
+   262→
+   263→  // Run inspections weekly for the past 4 weeks. Some will randomly fail/warn.
+   264→  for (let w = 0; w < 4; w++) {
+   265→    const weekOffset = w * 7;
+   266→    const inspDate = new Date(today);
+   267→    inspDate.setDate(today.getDate() - weekOffset);
+   268→    inspDate.setHours(9, 0, 0, 0);
+   269→
+   270→    for (const veh of createdVehicles) {
+   271→      if (veh.status === "retired") continue;
+   272→      // Skip ~20% randomly to vary density
+   273→      if (Math.random() < 0.2 && w > 0) continue;
+   274→
+   275→      // Decide if this inspection flags issues (~25% chance).
+   276→      // Deterministic demo hook: the current week (w=0) ALWAYS has one warning
+   277→      // (first vehicle) and one fail (second vehicle) so the fleet-controller
+   278→      // acknowledgement workflow is demonstrable right after seeding.
+   279→      let willFlag = Math.random() < 0.25;
+   280→      let forcedStatus: "warning" | "fail" | null = null;
+   281→      if (w === 0 && veh.id === createdVehicles[0].id) {
+   282→        willFlag = true;
+   283→        forcedStatus = "warning";
+   284→      } else if (w === 0 && createdVehicles[1] && veh.id === createdVehicles[1].id) {
+   285→        willFlag = true;
+   286→        forcedStatus = "fail";
+   287→      }
+   288→      const items = inspectionChecklistTemplate.map((t) => {
+   289→        let status: "ok" | "warning" | "fail" = "ok";
+   290→        let notes = "";
+   291→        if (willFlag && (forcedStatus !== null || Math.random() < 0.35)) {
+   292→          status = forcedStatus ?? (Math.random() < 0.4 ? "fail" : "warning");
+   293→          const noteMap: Record<string, string> = {
+   294→            tires: "Front-left tire tread below 3mm — needs replacement.",
+   295→            brakes: "Brake pedal feels soft — possible air in lines.",
+   296→            lights: "Reverse light not functioning.",
+   297→            fluids: "Brake fluid below MIN mark.",
+   298→            wipers: "Driver-side wiper blade torn.",
+   299→            body: "Scratch on rear bumper, mirror housing cracked.",
+   300→            seatbelts: "Rear middle belt retractor sticky.",
+   301→            horn: "Horn intermittent.",
+   302→            exhaust: "Visible smoke from exhaust on cold start.",
+   303→            steering: "Slight pull to the right under braking.",
+   304→          };
+   305→          notes = noteMap[t.id] ?? "Needs attention.";
+   306→        }
+   307→        return { ...t, status, notes };
+   308→      });
+   309→
+   310→      const hasFail = items.some((i) => i.status === "fail");
+   311→      const hasWarn = items.some((i) => i.status === "warning");
+   312→      const overallStatus = hasFail ? "fail" : hasWarn ? "warning" : "pass";
+   313→      const flagged = hasFail || hasWarn;
+   314→
+   315→      await db.vehicleInspection.create({
+   316→        data: {
+   317→          vehicleId: veh.id,
+   318→          inspectorId: driverMap[veh.id] ?? null,
+   319→          date: inspDate,
+   320→          overallStatus,
+   321→          flagged,
+   322→          acknowledgedBy: flagged && w >= 2 ? "Sarah Chen" : null,
+   323→          acknowledgedAt: flagged && w >= 2 ? new Date(inspDate.getTime() + 86400000) : null,
+   324→          items: JSON.stringify(items),
+   325→          notes: flagged
+   326→            ? "Driver reported issues during weekly check — needs fleet controller review."
+   327→            : "All checks passed.",
+   328→          odoReading: veh.mileage - Math.floor(Math.random() * 200),
+   329→        },
+   330→      });
+   331→    }
+   332→  }
+   333→
+   334→  // ---------- Service Records (history per vehicle) ----------
+   335→  const serviceTemplates: Array<{ type: string; description: string; task: string; intervalMileage?: number; intervalDays?: number }> = [
+   336→    { type: "oil-change", description: "Engine oil & filter change", task: "Oil change", intervalMileage: 15000, intervalDays: 365 },
+   337→    { type: "wheel-rotation", description: "Tire rotation — front to rear swap", task: "Wheel rotation", intervalMileage: 10000, intervalDays: 180 },
+   338→    { type: "brake-service", description: "Brake pad inspection & cleaning", task: "Brake inspection", intervalMileage: 20000, intervalDays: 365 },
+   339→    { type: "tire-replacement", description: "Replaced worn tires", task: "Tire replacement" },
+   340→    { type: "battery", description: "Battery replacement", task: "Battery replacement", intervalDays: 1095 },
+   341→    { type: "filter", description: "Cabin & air filter replacement", task: "Filter replacement", intervalMileage: 30000 },
+   342→    { type: "inspection", description: "Annual safety inspection", task: "Safety inspection", intervalDays: 365 },
+   343→  ];
+   344→
+   345→  // Helper: round to 2dp
+   346→  const r2 = (n: number) => Math.round(n * 100) / 100;
+   347→
+   348→  for (const veh of createdVehicles) {
+   349→    // Generate 3-5 historical service records per vehicle
+   350→    const numServices = 3 + Math.floor(Math.random() * 3);
+   351→    const used = new Set<number>();
+   352→    for (let i = 0; i < numServices; i++) {
+   353→      let tplIdx = Math.floor(Math.random() * serviceTemplates.length);
+   354→      while (used.has(tplIdx) && used.size < serviceTemplates.length) {
+   355→        tplIdx = (tplIdx + 1) % serviceTemplates.length;
+   356→      }
+   357→      used.add(tplIdx);
+   358→      const tpl = serviceTemplates[tplIdx];
+   359→      const monthsAgo = Math.floor(Math.random() * 18) + 1;
+   360→      const svcDate = new Date(today);
+   361→      svcDate.setMonth(today.getMonth() - monthsAgo);
+   362→      const svcMileage = Math.max(0, veh.mileage - Math.floor(Math.random() * 30000));
+   363→      const partsReplaced: Array<{ name: string; qty: number; cost: number }> = [];
+   364→      let cost = 50 + Math.floor(Math.random() * 200);
+   365→      if (tpl.type === "oil-change") partsReplaced.push({ name: "Engine oil 5W-30 (5L)", qty: 1, cost: 45 });
+   366→      if (tpl.type === "oil-change") partsReplaced.push({ name: "Oil filter", qty: 1, cost: 18 });
+   367→      if (tpl.type === "wheel-rotation") partsReplaced.push({ name: "Wheel weights (balance)", qty: 4, cost: 12 });
+   368→      if (tpl.type === "tire-replacement") {
+   369→        const tireCount = veh.type === "motorcycle" ? 2 : 4;
+   370→        partsReplaced.push({ name: "All-season tire", qty: tireCount, cost: 110 * tireCount });
+   371→        cost = 100 + tireCount * 110;
+   372→      }
+   373→      if (tpl.type === "brake-service") partsReplaced.push({ name: "Brake pad set", qty: 2, cost: 65 });
+   374→      if (tpl.type === "battery") partsReplaced.push({ name: "Battery 12V 70Ah", qty: 1, cost: 140 });
+   375→      if (tpl.type === "filter") partsReplaced.push({ name: "Cabin filter", qty: 1, cost: 22 });
+   376→      if (tpl.type === "filter") partsReplaced.push({ name: "Air filter", qty: 1, cost: 28 });
+   377→      const partsTotal = partsReplaced.reduce((s, p) => s + p.cost * p.qty, 0);
+   378→      cost = r2(cost + partsTotal * 0.1);
+   379→
+   380→      await db.serviceRecord.create({
+   381→        data: {
+   382→          vehicleId: veh.id,
+   383→          type: tpl.type,
+   384→          description: tpl.description,
+   385→          date: svcDate,
+   386→          mileage: svcMileage,
+   387→          cost: r2(cost),
+   388→          performedById: createdEmployees[7].id, // Carlos Mendoza — dispatcher, also acts as workshop coordinator
+   389→          supplier: ["City Auto Workshop", "FleetCare Services", "QuickFix Garage", "Manufacturer Service Centre"][i % 4],
+   390→          partsReplaced: JSON.stringify(partsReplaced),
+   391→          notes: i === 0 ? "Routine scheduled service." : "",
+   392→        },
+   393→      });
+   394→    }
+   395→  }
+   396→
+   397→  // ---------- Maintenance Schedules (recurring) ----------
+   398→  // Create schedules per vehicle for: oil change, wheel rotation, brake inspection, safety inspection
+   399→  const scheduleTemplates = [
+   400→    { task: "Oil change", intervalType: "both", intervalMileage: 15000, intervalDays: 365 },
+   401→    { task: "Wheel rotation", intervalType: "mileage", intervalMileage: 10000, intervalDays: null },
+   402→    { task: "Brake inspection", intervalType: "mileage", intervalMileage: 20000, intervalDays: null },
+   403→    { task: "Safety inspection", intervalType: "time", intervalMileage: null, intervalDays: 365 },
+   404→    { task: "Tire condition check", intervalType: "time", intervalMileage: null, intervalDays: 90 },
+   405→  ];
+   406→
+   407→  for (const veh of createdVehicles) {
+   408→    for (const tpl of scheduleTemplates) {
+   409→      // Find last matching service for this vehicle (if any)
+   410→      const lastService = await db.serviceRecord.findFirst({
+   411→        where: { vehicleId: veh.id, type: tpl.task.toLowerCase().replace(/\s+/g, "-") },
+   412→        orderBy: { date: "desc" },
+   413→      });
+   414→      // Use last service date if available, otherwise assume a recent "synthetic" service
+   415→      // so the next due date isn't absurdly far in the past.
+   416→      const fallbackDate = new Date(today.getTime() - Math.floor(Math.random() * 200 + 30) * 86400000);
+   417→      const lastDate = lastService?.date ?? fallbackDate;
+   418→      const lastMileage = lastService?.mileage ?? Math.max(0, veh.mileage - Math.floor(Math.random() * 5000 + 1000));
+   419→
+   420→      // Compute next due — fast-forward past dates by repeating the interval until future
+   421→      let nextDueDate: Date | null = null;
+   422→      let nextDueMileage: number | null = null;
+   423→      if (tpl.intervalDays) {
+   424→        nextDueDate = new Date(lastDate);
+   425→        nextDueDate.setDate(nextDueDate.getDate() + tpl.intervalDays);
+   426→        // Fast-forward until nextDueDate is in the future
+   427→        while (nextDueDate.getTime() < today.getTime()) {
+   428→          nextDueDate.setDate(nextDueDate.getDate() + tpl.intervalDays);
+   429→        }
+   430→      }
+   431→      if (tpl.intervalMileage) {
+   432→        nextDueMileage = lastMileage + tpl.intervalMileage;
+   433→        // Fast-forward mileage if already past
+   434→        while (nextDueMileage !== null && nextDueMileage < veh.mileage) {
+   435→          nextDueMileage += tpl.intervalMileage;
+   436→        }
+   437→      }
+   438→
+   439→      // Inject ~25% overdue and ~20% due-soon for demo realism
+   440→      const roll = Math.random();
+   441→      if (roll < 0.25 && nextDueDate) {
+   442→        // Override to overdue (1-15 days past)
+   443→        nextDueDate = new Date(today.getTime() - Math.floor(Math.random() * 15 + 1) * 86400000);
+   444→      } else if (roll < 0.45 && nextDueDate) {
+   445→        // Override to due-soon (1-13 days future)
+   446→        nextDueDate = new Date(today.getTime() + Math.floor(Math.random() * 13 + 1) * 86400000);
+   447→      }
+   448→      if (roll < 0.20 && nextDueMileage) {
+   449→        // Override to mileage-overdue
+   450→        nextDueMileage = veh.mileage - Math.floor(Math.random() * 800 + 50);
+   451→      } else if (roll < 0.35 && nextDueMileage) {
+   452→        // Due-soon by mileage
+   453→        nextDueMileage = veh.mileage + Math.floor(Math.random() * 900 + 100);
+   454→      }
+   455→
+   456→      await db.maintenanceSchedule.create({
+   457→        data: {
+   458→          vehicleId: veh.id,
+   459→          task: tpl.task,
+   460→          intervalType: tpl.intervalType,
+   461→          intervalMileage: tpl.intervalMileage,
+   462→          intervalDays: tpl.intervalDays,
+   463→          lastPerformedDate: lastDate,
+   464→          lastPerformedMileage: lastMileage,
+   465→          nextDueDate,
+   466→          nextDueMileage,
+   467→          notes: "",
+   468→        },
+   469→      });
+   470→    }
+   471→  }
+   472→
+   473→  // ---------- Weekly Reports ----------
+   474→  for (let w = 3; w >= 0; w--) {
+   475→    const weekStart = new Date(today);
+   476→    weekStart.setDate(today.getDate() - 7 * (w + 1));
+   477→    weekStart.setDate(weekStart.getDate() - weekStart.getDay() + 1);
+   478→    const weekEnd = new Date(weekStart);
+   479→    weekEnd.setDate(weekStart.getDate() + 6);
+   480→    const totalHours = 320 + Math.floor(Math.random() * 80);
+   481→    await db.weeklyReport.create({
+   482→      data: {
+   483→        weekStart,
+   484→        weekEnd,
+   485→        title: `Weekly Operations Report — Week of ${weekStart.toLocaleDateString()}`,
+   486→        summary: `Team maintained ${totalHours} productive hours across operations. Fleet completed ${15 + w * 2} trips totalling ${1200 + w * 180} km. Two new complaints filed and ${3 - Math.floor(w / 2)} resolved. Loan portfolio remained stable with no defaults.`,
+   487→        totalEmployees: createdEmployees.length,
+   488→        totalHours,
+   489→        complaintsOpen: Math.max(0, 3 - w),
+   490→        complaintsResolved: 2 + Math.floor(Math.random() * 3),
+   491→        leaveDays: 4 + Math.floor(Math.random() * 6),
+   492→        fleetTrips: 15 + w * 2,
+   493→        fleetDistance: 1200 + w * 180,
+   494→        loansActive: 6,
+   495→        authoredById: createdEmployees[0].id,
+   496→      },
+   497→    });
+   498→  }
+   499→
+   500→  // ---------- Daily Factory Reports (multi-site operational reports) ----------
+   501→  // Modeled on the BAYWASH CLEANING daily factory report format.
+   502→  const factoryReportSections = [
+   503→    {
+   504→      id: "s1",
+   505→      siteName: "HANGANA",
+   506→      reporterName: "COETZEE",
+   507→      summary: "Cleaning findings discussed with team to rectify. Multiple machinery issues including burned motors and broken OPC.",
+   508→      items: [
+   509→        { id: "i1", category: "cleaning-findings", description: "Conveyor at packer line was dirty, cleaning was done", actionNeeded: "None — completed", responsiblePerson: "Cleaning Team", status: "resolved" },
+   510→        { id: "i2", category: "cleaning-findings", description: "Rust on S/steel poles and sprockets of autoplate", actionNeeded: "Treat rust immediately, schedule descaling", responsiblePerson: "Maintenance Lead", status: "open" },
+   511→        { id: "i3", category: "cleaning-findings", description: "All findings discussed with team to rectify", actionNeeded: "Follow up next shift", responsiblePerson: "Coetzee", status: "in-progress" },
+   512→        { id: "i4", category: "machinery", description: "Machine fitting spring off — almost injured person", actionNeeded: "URGENT: isolate machine, replace fitting spring", responsiblePerson: "Maintenance Lead", status: "open" },
+   513→        { id: "i5", category: "machinery", description: "BWC033 at the workshop (motors burned)", actionNeeded: "Send to workshop for motor rewind", responsiblePerson: "Workshop Supervisor", status: "in-progress" },
+   514→        { id: "i6", category: "machinery", description: "OPC needs repairs — system is not working from inside", actionNeeded: "Diagnose OPC fault, order spare parts", responsiblePerson: "Engineering", status: "open" },
+   515→        { id: "i7", category: "personnel", description: "Haikali booked off sick", actionNeeded: "Arrange cover for shift", responsiblePerson: "HR", status: "in-progress" },
+   516→        { id: "i8", category: "personnel", description: "Teofilus Titus booked off for hand injury", actionNeeded: "File incident report, follow up medical clearance", responsiblePerson: "HR / Safety Officer", status: "open" },
+   517→        { id: "i9", category: "personnel", description: "Oiva Katali AWOL", actionNeeded: "Issue formal AWOL notice, disciplinary follow-up", responsiblePerson: "HR", status: "open" },
+   518→        { id: "i10", category: "personnel", description: "Site has 1 shortage (in place of Humu)", actionNeeded: "Recruit or transfer from pool", responsiblePerson: "Operations Manager", status: "open" },
+   519→        { id: "i11", category: "ppe-equipment", description: "Omankete PPE given to Hangana (Oilskins & gumboots)", actionNeeded: "None — issued", responsiblePerson: "Stores", status: "resolved" },
+   520→        { id: "i12", category: "ppe-equipment", description: "Brushware, Oilskins, Socks and PPE ordered — current ones old and torn", actionNeeded: "Expedite delivery, interim issue from stock", responsiblePerson: "Procurement", status: "in-progress" },
+   521→        { id: "i13", category: "other", description: "Upi change shifts to work 5 hours on Sundays", actionNeeded: "Update roster, confirm with HR", responsiblePerson: "Operations Manager", status: "in-progress" },
+   522→      ],
+   523→    },
+   524→    {
+   525→      id: "s2",
+   526→      siteName: "BHL",
+   527→      reporterName: "FRANS & COETZEE",
+   528→      summary: "Truck and car wash activity. Foamer issues and lighting needs fixing. Leave request pending.",
+   529→      items: [
+   530→        { id: "i1", category: "cleaning-findings", description: "2 trucks and 1 car washed on 23/06/2026", actionNeeded: "None — completed", responsiblePerson: "BHL Team", status: "resolved" },
+   531→        { id: "i2", category: "machinery", description: "Team had difficulty with the foamer, requested assistance", actionNeeded: "Dispatch technician to inspect foamer unit", responsiblePerson: "Maintenance Lead", status: "open" },
+   532→        { id: "i3", category: "cleaning-findings", description: "Container light needs fixing — too dark during morning shift", actionNeeded: "Replace light fitting, electrician call-out", responsiblePerson: "Facilities", status: "open" },
+   533→        { id: "i4", category: "cleaning-findings", description: "Team cleaning yard and inside container", actionNeeded: "Continue daily schedule", responsiblePerson: "BHL Team", status: "in-progress" },
+   534→        { id: "i5", category: "personnel", description: "Simon Andreas wants leave on 25/06/2026", actionNeeded: "Process leave request, arrange cover", responsiblePerson: "HR", status: "open" },
+   535→      ],
+   536→    },
+   537→    {
+   538→      id: "s3",
+   539→      siteName: "BACHMUS",
+   540→      reporterName: "COETZEE",
+   541→      summary: "3 trucks and 1 car washed. Customer complaint about poor cleaning addressed on site.",
+   542→      items: [
+   543→        { id: "i1", category: "cleaning-findings", description: "3 trucks and 1 car washed on 23/06/2026", actionNeeded: "None — completed", responsiblePerson: "Bachmus Team", status: "resolved" },
+   544→        { id: "i2", category: "cleaning-findings", description: "Complaint of poor cleaning on a truck — Coetzee was on site to address the team", actionNeeded: "Re-wash standards briefing, follow-up quality check", responsiblePerson: "Coetzee", status: "in-progress" },
+   545→        { id: "i3", category: "cleaning-findings", description: "Team cleaning ablutions daily if trucks are few", actionNeeded: "Maintain daily schedule", responsiblePerson: "Bachmus Team", status: "in-progress" },
+   546→      ],
+   547→    },
+   548→    {
+   549→      id: "s4",
+   550→      siteName: "DEEP OCEAN",
+   551→      reporterName: "FRANS",
+   552→      summary: "Rust issues across glazing shoots, fish racks and grader pockets. Internal audit upcoming. Site has 3 shortages.",
+   553→      items: [
+   554→        { id: "i1", category: "cleaning-findings", description: "Rust on Glazing shoots, fish racks and grader pockets", actionNeeded: "Team to react all rust immediately", responsiblePerson: "Deep Ocean Team", status: "open" },
+   555→        { id: "i2", category: "cleaning-findings", description: "Plate freezer area to squeegee daily", actionNeeded: "Add to daily cleaning checklist", responsiblePerson: "Site Supervisor", status: "in-progress" },
+   556→        { id: "i3", category: "cleaning-findings", description: "Final rinsing to be done with fresh water", actionNeeded: "Confirm fresh water supply, brief team", responsiblePerson: "Site Supervisor", status: "in-progress" },
+   557→        { id: "i4", category: "other", description: "Site has an internal audit", actionNeeded: "Prepare audit folder, brief team on standards", responsiblePerson: "Quality Manager", status: "open" },
+   558→        { id: "i5", category: "personnel", description: "Site has 3 shortages", actionNeeded: "Coordinate with HR for transfers or new hires", responsiblePerson: "HR / Operations Manager", status: "open" },
+   559→      ],
+   560→    },
+   561→    {
+   562→      id: "s5",
+   563→      siteName: "PEREIRA",
+   564→      reporterName: "FRANS",
+   565→      summary: "Rust on S/Steel of glazing tank and sorting grader. Black brushware needed. Housekeeping issues. One staff member on leave.",
+   566→      items: [
+   567→        { id: "i1", category: "cleaning-findings", description: "Rust on S/Steel of glazing tank and sorting grader", actionNeeded: "Treat rust, schedule descaling", responsiblePerson: "Maintenance Lead", status: "open" },
+   568→        { id: "i2", category: "ppe-equipment", description: "Leonard to order black brushware for drains cleaning", actionNeeded: "Place PO, follow up delivery", responsiblePerson: "Leonard (Procurement)", status: "in-progress" },
+   569→        { id: "i3", category: "cleaning-findings", description: "Poor housekeeping in chemical room", actionNeeded: "Reorganize chemical storage, brief team on standards", responsiblePerson: "Site Supervisor", status: "open" },
+   570→        { id: "i4", category: "personnel", description: "Mathew Niilonga is on leave", actionNeeded: "Arrange cover", responsiblePerson: "HR", status: "resolved" },
+   571→      ],
+   572→    },
+   573→  ];
+   574→
+   575→  await db.factoryReport.create({
+   576→    data: {
+   577→      title: "Daily Factory Report — 24 June 2026",
+   578→      reportDate: new Date("2026-06-24"),
+   579→      company: "BAYWASH CLEANING",
+   580→      frequency: "DAILY",
+   581→      compiledBy: "FRANS AND COETZEE",
+   582→      compiledFor: "OPERATIONS TEAM",
+   583→      sections: JSON.stringify(factoryReportSections),
+   584→      status: "submitted",
+   585→      notes: "Multi-site daily report covering 5 sites. Several urgent machinery items flagged for immediate action.",
+   586→    },
+   587→  });
+   588→
+   589→  // Also create a couple of older reports for history
+   590→  await db.factoryReport.create({
+   591→    data: {
+   592→      title: "Daily Factory Report — 23 June 2026",
+   593→      reportDate: new Date("2026-06-23"),
+   594→      company: "BAYWASH CLEANING",
+   595→      frequency: "DAILY",
+   596→      compiledBy: "FRANS",
+   597→      compiledFor: "OPERATIONS TEAM",
+   598→      sections: JSON.stringify([
+   599→        {
+   600→          id: "s1", siteName: "HANGANA", reporterName: "COETZEE", summary: "Routine day, minor cleaning items.",
+   601→          items: [
+   602→            { id: "i1", category: "cleaning-findings", description: "Conveyor packer line cleaned", actionNeeded: "None", responsiblePerson: "Team", status: "resolved" },
+   603→            { id: "i2", category: "machinery", description: "Routine lubrication of autoplate sprockets", actionNeeded: "None", responsiblePerson: "Maintenance", status: "resolved" },
+   604→          ],
+   605→        },
+   606→        {
+   607→          id: "s2", siteName: "DEEP OCEAN", reporterName: "FRANS", summary: "All clear.",
+   608→          items: [
+   609→            { id: "i1", category: "cleaning-findings", description: "Plate freezer squeegeed", actionNeeded: "None", responsiblePerson: "Team", status: "resolved" },
+   610→          ],
+   611→        },
+   612→      ]),
+   613→      status: "reviewed",
+   614→      notes: "Routine day — all items closed.",
+   615→    },
+   616→  });
+   617→
+   618→  await db.factoryReport.create({
+   619→    data: {
+   620→      title: "Daily Factory Report — 22 June 2026",
+   621→      reportDate: new Date("2026-06-22"),
+   622→      company: "BAYWASH CLEANING",
+   623→      frequency: "DAILY",
+   624→      compiledBy: "COETZEE",
+   625→      compiledFor: "OPERATIONS TEAM",
+   626→      sections: JSON.stringify([
+   627→        {
+   628→          id: "s1", siteName: "BHL", reporterName: "COETZEE", summary: "Foamer issue first reported.",
+   629→          items: [
+   630→            { id: "i1", category: "machinery", description: "Foamer pressure low — first reported", actionNeeded: "Technician call-out", responsiblePerson: "Maintenance Lead", status: "in-progress" },
+   631→            { id: "i2", category: "cleaning-findings", description: "3 trucks washed", actionNeeded: "None", responsiblePerson: "Team", status: "resolved" },
+   632→          ],
+   633→        },
+   634→        {
+   635→          id: "s2", siteName: "PEREIRA", reporterName: "FRANS", summary: "Chemical room housekeeping flagged.",
+   636→          items: [
+   637→            { id: "i1", category: "cleaning-findings", description: "Chemical room cluttered", actionNeeded: "Reorganize by end of week", responsiblePerson: "Site Supervisor", status: "open" },
+   638→          ],
+   639→        },
+   640→      ]),
+   641→      status: "reviewed",
+   642→      notes: "Foamer issue first surfaced here.",
+   643→    },
+   644→  });
+   645→
+   646→  // ---------- Sheets ----------
+   647→  const projectSheetColumns = JSON.stringify([
+   648→    { id: "c1", name: "Task", type: "text" },
+   649→    { id: "c2", name: "Owner", type: "text" },
+   650→    { id: "c3", name: "Status", type: "select", options: ["Not Started", "In Progress", "Blocked", "Done"] },
+   651→    { id: "c4", name: "Due Date", type: "date" },
+   652→    { id: "c5", name: "Priority", type: "select", options: ["Low", "Medium", "High", "Critical"] },
+   653→    { id: "c6", name: "% Complete", type: "number" },
+   654→  ]);
+   655→  const projectSheetRows = JSON.stringify([
+   656→    { c1: "Roll out PWA build to Play Store", c2: "Robert Liu", c3: "In Progress", c4: "2026-11-20", c5: "High", c6: 60 },
+   657→    { c1: "Q4 safety audit — warehouse B", c2: "Sarah Chen", c3: "Not Started", c4: "2026-11-25", c5: "Critical", c6: 0 },
+   658→    { c1: "Renegotiate fuel supplier contract", c2: "Lena Fischer", c3: "In Progress", c4: "2026-12-01", c5: "Medium", c6: 35 },
+   659→    { c1: "Driver training refresher — batch 2", c2: "Emma Lindqvist", c3: "Blocked", c4: "2026-11-18", c5: "Medium", c6: 20 },
+   660→    { c1: "Replace legacy dispatch software", c2: "Carlos Mendoza", c3: "Done", c4: "2026-11-05", c5: "High", c6: 100 },
+   661→    { c1: "Onboard 3 new field technicians", c2: "Emma Lindqvist", c3: "In Progress", c4: "2026-11-22", c5: "Low", c6: 50 },
+   662→    { c1: "Year-end inventory reconciliation", c2: "Lena Fischer", c3: "Not Started", c4: "2026-12-15", c5: "High", c6: 0 },
+   663→    { c1: "Customer NPS survey — November", c2: "Priya Patel", c3: "In Progress", c4: "2026-11-30", c5: "Low", c6: 75 },
+   664→  ]);
+   665→  await db.sheet.create({
+   666→    data: {
+   667→      name: "Operations Project Tracker",
+   668→      description: "Cross-team initiative tracker — owner, status, due date, priority.",
+   669→      columns: projectSheetColumns,
+   670→      rows: projectSheetRows,
+   671→    },
+   672→  });
+   673→
+   674→  const assetSheetColumns = JSON.stringify([
+   675→    { id: "c1", name: "Asset", type: "text" },
+   676→    { id: "c2", name: "Serial", type: "text" },
+   677→    { id: "c3", name: "Assigned To", type: "text" },
+   678→    { id: "c4", name: "Location", type: "text" },
+   679→    { id: "c5", name: "Condition", type: "select", options: ["New", "Good", "Fair", "Poor"] },
+   680→    { id: "c6", name: "Value", type: "number" },
+   681→  ]);
+   682→  const assetSheetRows = JSON.stringify([
+   683→    { c1: "MacBook Pro 16", c2: "MBP-2201", c3: "Robert Liu", c4: "HQ — Engineering", c5: "Good", c6: 2800 },
+   684→    { c1: "Forklift Toyota 8FG", c2: "FL-301", c3: "Warehouse B", c4: "Warehouse B", c5: "Fair", c6: 18000 },
+   685→    { c1: "iPad Pro 11", c2: "IPD-410", c3: "Priya Patel", c4: "Sales", c5: "New", c6: 1100 },
+   686→    { c1: "Scan-gun Zebra TC52", c2: "ZN-9001", c3: "Marcus Reyes", c4: "Logistics", c5: "Good", c6: 850 },
+   687→    { c1: "Workshop compressor", c2: "WC-12", c3: "Site C", c4: "Site C", c5: "Poor", c6: 1500 },
+   688→  ]);
+   689→  await db.sheet.create({
+   690→    data: {
+   691→      name: "Asset Register",
+   692→      description: "Company-owned assets — laptops, equipment, vehicles and tools.",
+   693→      columns: assetSheetColumns,
+   694→      rows: assetSheetRows,
+   695→    },
+   696→  });
+   697→
+   698→  // ---------- Official company form samples ----------
+   699→  await db.formSubmission.create({
+   700→    data: {
+   701→      template: "incident-report",
+   702→      createdBy: "Sarah Chen",
+   703→      data: JSON.stringify({
+   704→        incidentId: "IR-2026-0001",
+   705→        dateOfIncident: "2026-11-12",
+   706→        timeOfIncident: "10:45",
+   707→        customerName: "Anna Visser",
+   708→        customerInformation: "Tel: +264 81 234 5678 · anna.visser@example.com · Swakopmund",
+   709→        dateCustomerReported: "2026-11-12",
+   710→        vehicleDetails: "Toyota Corolla 2020 · white · CA-456-123",
+   711→        natureOfDamage: "Scratches on the left rear door panel and scuff mark on rear bumper caused by vacuum hose attachment falling during interior cleaning.",
+   712→        employeeInvolved: "yes",
+   713→        employeeNames: "Tom Bradley",
+   714→        actionTakenByCustomer: "Reported the damage immediately at the service desk with photos.",
+   715→        desiredResolution: "Professional polish & touch-up paint at no cost.",
+   716→        actionTakenByCompany: "Incident logged; body shop quotation requested; customer offered courtesy wash while awaiting assessment.",
+   717→        employeeHandling: "Sarah Chen",
+   718→        followUpActions: "Body shop assessment on 14/11/2026; repair scheduled for 18/11/2026; manager to confirm completion with customer.",
+   719→        managementSignatory: "Dirk Bosman",
+   720→      }),
+   721→    },
+   722→  });
+   723→  await db.formSubmission.create({
+   724→    data: {
+   725→      template: "customer-complaint",
+   726→      createdBy: "Sarah Chen",
+   727→      data: JSON.stringify({
+   728→        date: "2026-11-14",
+   729→        complaintId: "CC-2026-0001",
+   730→        receivedVia: "Phone call",
+   731→        clientName: "Pieter van Wyk",
+   732→        clientEmail: "p.vanwyk@example.com",
+   733→        supervisorName: "Carlos Mendoza",
+   734→        employeeName: "Lena Fischer",
+   735→        incidentDetails: "Client states the interior was not fully cleaned — crumbs still visible on the back seats and a faint damp smell after the full-service wash on 13/11/2026.",
+   736→        clientWants: "Free re-clean of the interior and assurance the drying process is improved.",
+   737→        companyAction: "Apologised; re-clean scheduled same afternoon at no charge; drying protocol reviewed with the team.",
+   738→        dealtWithBy: "Carlos Mendoza",
+   739→        complaintHandled: "yes",
+   740→        managementSignatory: "Dirk Bosman",
+   741→        employeeSignatory: "Carlos Mendoza",
+   742→      }),
+   743→    },
+   744→  });
+   745→  await db.formSubmission.create({
+   746→    data: {
+   747→      template: "leave-application",
+   748→      createdBy: "Emma Lindqvist",
+   749→      data: JSON.stringify({
+   750→        employeeName: "Marcus Reyes",
+   751→        companyNo: "BW-1002",
+   752→        section: "Logistics",
+   753→        l1Opts: ["FULL"],
+   754→        l1From: "2026-12-01",
+   755→        l1To: "2026-12-12",
+   756→        l1Days: "10",
+   757→        addressWhileOnLeave: "14 Coral Street, Vineta, Swakopmund",
+   758→        holidayBonus: "yes",
+   759→        leavePay: "yes",
+   760→      }),
+   761→    },
+   762→  });
+   763→
+   764→  // ---------- Settings ----------
+   765→  await db.setting.create({ data: { key: "company.name", value: "BAYWASH Group" } });
+   766→  await db.setting.create({ data: { key: "company.currency", value: "USD" } });
+   767→  await db.setting.create({ data: { key: "leave.annual.allowance", value: "21" } });
+   768→
+   769→  console.log("Seed completed");
+   770→  console.log(`  Employees: ${createdEmployees.length}`);
+   771→  console.log(`  Vehicles: ${createdVehicles.length}`);
+   772→}
+   773→
+   774→main()
+   775→  .catch((e) => {
+   776→    console.error("Seed failed:", e);
+   777→    process.exit(1);
+   778→  })
+   779→  .finally(async () => {
+   780→    await db.$disconnect();
+   781→  });
+   782→

@@ -9,11 +9,13 @@ export type SectionId =
   | "leave"
   | "complaints"
   | "loans"
+  | "payroll"
   | "forms"
   | "fleet"
   | "factory-reports"
   | "reports"
-  | "sheets";
+  | "sheets"
+  | "employee-portal";
 
 interface AppState {
   activeSection: SectionId;

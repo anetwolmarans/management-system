@@ -11,6 +11,7 @@ async function main() {
   await db.sheet.deleteMany();
   await db.formSubmission.deleteMany();
   await db.weeklyReport.deleteMany();
+  await db.payslip.deleteMany();
   await db.fleetLog.deleteMany();
   await db.vehicle.deleteMany();
   await db.loan.deleteMany();
@@ -50,6 +51,8 @@ async function main() {
         salary: e.salary,
         status: i === 11 ? "on-leave" : "active",
         avatar: null,
+        // Default portal PIN = last 4 digits of the employee number (e.g. BW-1002 → 1002)
+        pin: String(1001 + i).slice(-4),
       },
     });
     createdEmployees.push(emp);
@@ -762,12 +765,83 @@ async function main() {
   });
 
   // ---------- Settings ----------
+  // ---------- Payslips (last 3 completed months) ----------
+  const MONTH_NAMES = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+  const activeLoans = await db.loan.findMany({ where: { status: "active" } });
+  const loanByEmp = new Map(activeLoans.map((l) => [l.employeeId, l]));
+
+  for (let back = 3; back >= 1; back--) {
+    const period = new Date(today.getFullYear(), today.getMonth() - back, 1);
+    const month = period.getMonth() + 1;
+    const year = period.getFullYear();
+    const monthEnd = new Date(year, month, 1);
+    const periodLabel = `${MONTH_NAMES[month - 1]} ${year}`;
+
+    for (let i = 0; i < createdEmployees.length; i++) {
+      const emp = createdEmployees[i];
+      const empIdx = parseInt(emp.employeeNo.slice(-4), 10) - 1001;
+
+      // Deterministic overtime & bonus per employee-month
+      const otHours = ((empIdx * 7 + month * 3) % 14);
+      const otRate = r2((emp.salary / 160) * 1.5);
+      const overtime = r2(otHours * otRate);
+      const transport = ["Logistics", "Engineering"].includes(emp.department) ? 150 : 0;
+      const bonus = (empIdx + month) % 4 === 0 ? r2(emp.salary * 0.05) : 0;
+
+      const earnings = [
+        { label: "Base salary", amount: r2(emp.salary), kind: "earning" as const },
+      ];
+      if (overtime > 0) {
+        earnings.push({ label: `Overtime (${otHours} hrs @ $${otRate.toFixed(2)}/h)`, amount: overtime, kind: "earning" as const });
+      }
+      if (transport) earnings.push({ label: "Transport allowance", amount: transport, kind: "earning" as const });
+      if (bonus) earnings.push({ label: "Performance bonus", amount: bonus, kind: "earning" as const });
+
+      const gross = r2(earnings.reduce((a, e) => a + e.amount, 0));
+      const tax = r2(gross * 0.12);
+      const social = r2(Math.min(gross * 0.01, 81));
+      const pension = r2(gross * 0.02);
+      const loan = loanByEmp.get(emp.id);
+      const loanDue = loan && loan.issuedAt < monthEnd ? loan.monthlyPayment : 0;
+
+      const deductions = [
+        { label: "Income tax (PAYE 12%)", amount: tax, kind: "deduction" as const },
+        { label: "Social security", amount: social, kind: "deduction" as const },
+        { label: "Pension fund", amount: pension, kind: "deduction" as const },
+      ];
+      if (loanDue) deductions.push({ label: "Staff loan installment", amount: r2(loanDue), kind: "deduction" as const });
+
+      const totalDed = r2(deductions.reduce((a, d) => a + d.amount, 0));
+      const net = r2(gross - totalDed);
+      const hours = 160 + otHours;
+
+      await db.payslip.create({
+        data: {
+          employeeId: emp.id,
+          month,
+          year,
+          periodLabel,
+          baseSalary: r2(emp.salary),
+          gross,
+          deductions: totalDed,
+          net,
+          hours,
+          items: JSON.stringify([...earnings, ...deductions]),
+          notes: bonus ? "Includes quarterly performance bonus." : null,
+          status: "issued",
+          issuedAt: new Date(year, month - 1, 25),
+        },
+      });
+    }
+  }
+
   await db.setting.create({ data: { key: "company.name", value: "BAYWASH Group" } });
   await db.setting.create({ data: { key: "company.currency", value: "USD" } });
   await db.setting.create({ data: { key: "leave.annual.allowance", value: "21" } });
 
   console.log("Seed completed");
   console.log(`  Employees: ${createdEmployees.length}`);
+  console.log(`  Payslips: ${createdEmployees.length * 3} (last 3 months)`);
   console.log(`  Vehicles: ${createdVehicles.length}`);
 }
 

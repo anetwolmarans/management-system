@@ -1,6 +1,6 @@
-# BAYWASH Group — Manager Dashboard
+# BAYWASH Group — Manager Dashboard & Employee App
 
-A unified manager workspace for **BAYWASH Group** that runs as both a **web app** and an installable **PWA (APK-style)** on Android, designed to be as useful as Smartsheet for cross-team operations.
+A unified manager workspace for **BAYWASH Group** that runs as both a **web app** and an installable **PWA (APK-style)** on Android, designed to be as useful as Smartsheet for cross-team operations — plus a dedicated **Employee App** where staff check their payslips, leave approvals and personal info.
 
 ## Features
 
@@ -12,6 +12,8 @@ A unified manager workspace for **BAYWASH Group** that runs as both a **web app*
 | **Leave** | Submit requests (annual / sick / unpaid / emergency / maternity), approve / reject |
 | **Complaints** | File, filter by status/priority/category, investigate, resolve with notes |
 | **Loans** | Issue loans with interest & term, pay installments, track outstanding balance |
+| **Payroll** | **Monthly payslip run** — generate payslips for all employees in one click (computed from salary, approved timesheet hours at 1.5× overtime rate, transport allowances, performance bonuses, and active staff-loan installments; deductions = PAYE 12% + social security + pension). Add slips manually, review gross/deductions/net per period, download branded PDFs, delete slips. Issued slips **appear instantly in each employee's app** |
+| **Employee App** | A standalone **Android-style self-service portal** (`/?app=employee`, also in the PWA shortcuts and the sidebar “Employee App” button). Staff sign in with **employee number or email + PIN** (default PIN = last 4 digits of the employee number) and get: **Home** (latest payslip with net pay + one-tap PDF download, live leave-approval status, loan balance, quick stats), **Payslips** (query by year/month/free-text and open any slip's earnings/deductions breakdown, download as branded PDF), **Leave** (approval status of every request in color-coded badges + submit new requests straight to the manager), **Profile** (personal info, base salary, staff loan, year-to-date totals, sign-out) |
 | **Fleet** | Vehicle registry with **purchase data** (price, date, VIN, supplier, insurance & registration expiry), **weekly driver inspections** (10-point checklist that auto-flags the fleet controller on warning/fail), **service history** with parts replaced (oil, filters, tires, brake pads, batteries), **recurring maintenance schedule** (oil change, wheel rotation, brake inspection, etc.) with **overdue / due-soon / OK** status, and a per-vehicle **history timeline** drawer combining inspections + services |
 | **Factory Reports** | Multi-site daily operational reports (e.g. BAYWASH CLEANING). Each report covers multiple sites (HANGANA, BHL, BACHMUS, DEEP OCEAN, PEREIRA) with categorized action items: **Cleaning Findings, Machinery, Personnel, PPE/Equipment, Other**. Every item tracks description, action needed, responsible person, and status (open / in-progress / resolved). Export to text format that matches the original report layout. |
 | **Company Forms** | The five **official BAYWASH paper forms** digitized — fill them in on screen and **download as a branded PDF** ready to print, sign and send to a client or employee. Includes the full doc-control header (REV/DATE, DOC. NAME, REVIEW NR, CREATED BY, APPROVED BY), navy section banners, YES/NO tick boxes, the leave-table layout, signature lines and page numbers:
@@ -22,6 +24,12 @@ A unified manager workspace for **BAYWASH Group** that runs as both a **web app*
   - **BC-MLAF-01 · Multi Leave Application Form** (BAYWASH CLEANING) — 6 leave types, unpaid/AWOL table, payments required |
 | **Weekly Reports** | Auto-generated operational summaries, export to text |
 | **Sheets** | Smartsheet-style grids — custom columns (text/number/select/date), CSV export |
+
+## Payslip PDF
+
+- Branded A4 document generated server-side with pdfkit: navy header with the BAYWASH mark, employee info grid, side-by-side **Earnings / Deductions** tables, highlighted **NET PAY** banner, **year-to-date** totals, declaration and HR contact line.
+- Filename: `BAYWASH_Payslip_<Name>_<YYYY-MM>.pdf` — opens in a new tab for printing/saving, or can be sent to the employee or a client (e.g. bank proof of income).
+- Employees can only fetch their **own** slips (ownership check on the PDF endpoint).
 
 ## Company Forms highlights
 
@@ -69,17 +77,31 @@ The manifest, icons (192px, 512px, apple-touch-icon), and standalone display mod
 ## Project structure
 
 ```
-prisma/schema.prisma         — 11 models: Employee, Timesheet, LeaveRequest, Complaint, Loan,
-                                Vehicle (with purchase data), FleetLog, VehicleInspection,
-                                ServiceRecord, MaintenanceSchedule, WeeklyReport, Sheet, Setting
+prisma/schema.prisma         — 15 models: Employee (with portal PIN), Timesheet, LeaveRequest, Complaint, Loan,
+                                Payslip, Vehicle (with purchase data), FleetLog, VehicleInspection,
+                                ServiceRecord, MaintenanceSchedule, FactoryReport, WeeklyReport, Sheet,
+                                FormSubmission, Setting
 scripts/seed.ts              — realistic demo data: 12 employees, 7 vehicles, ~50 trips,
-                                23 inspections, 29 service records, 35 maintenance schedules
-src/app/api/                 — REST endpoints for every module including
-                                /api/fleet/{vehicles,inspections,services,maintenance}
-src/components/views/fleet.tsx — Fleet UI with 4 sub-tabs and 4 dialogs
+                                23 inspections, 29 service records, 35 maintenance schedules,
+                                36+ payslips (last 3 months)
+src/app/api/portal/          — employee-app endpoints: login (PIN), me, payslips (query),
+                                payslips/[id]/pdf (branded PDF), leave
+src/app/api/payslips/        — manager payroll: list, generate month, create, update, delete
+src/lib/payroll.ts           — payslip computation engine (overtime, allowances, loans, deductions)
+src/lib/payslip-pdf.ts       — branded payslip PDF generator
+src/components/views/employee-portal.tsx — the Employee App (login + 4 tabs)
+src/components/views/payroll.tsx — manager Payroll UI
 src/components/{sidebar,topbar,mobile-nav,app-shell}.tsx — layout
 src/lib/store.ts             — Zustand UI state (active section, sidebar, mobile nav)
 ```
+
+## Employee App demo credentials
+
+| Employee | Employee number | PIN |
+| --- | --- | --- |
+| Marcus Reyes | `BW-1002` | `1002` |
+| Sarah Chen | `BW-1001` | `1001` |
+| …any employee | `BW-10XX` | `10XX` (last 4 digits of the number) |
 
 ## Dev commands
 

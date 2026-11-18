@@ -32,6 +32,11 @@
   ],
   "shortcuts": [
     {
+      "name": "Employee App",
+      "url": "/?app=employee",
+      "description": "Payslips, leave status and personal info for employees"
+    },
+    {
       "name": "Dashboard",
       "url": "/?section=dashboard",
       "description": "Open KPI dashboard"

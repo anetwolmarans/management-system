@@ -22,6 +22,7 @@ model Employee {
   salary      Float
   status      String   @default("active") // active | on-leave | suspended | terminated
   avatar      String?
+  pin         String   @default("0000") // employee-app portal access code
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
@@ -33,6 +34,7 @@ model Employee {
   inspections    VehicleInspection[]  @relation("InspectionInspector")
   services       ServiceRecord[]      @relation("ServiceMechanic")
   reports        WeeklyReport[]       @relation("ReportAuthor")
+  payslips       Payslip[]
 }
 
 model Timesheet {
@@ -257,6 +259,31 @@ model Sheet {
   rows        String   // JSON-encoded array of row objects keyed by column id
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+}
+
+// Monthly payslip issued by payroll — visible to the employee in the BAYWASH app.
+// items: JSON [{ label, amount, kind: "earning" | "deduction" }]
+model Payslip {
+  id           String   @id @default(cuid())
+  employeeId   String
+  month        Int      // 1-12
+  year         Int
+  periodLabel  String   // e.g. "November 2026"
+  baseSalary   Float
+  gross        Float
+  deductions   Float
+  net          Float
+  hours        Float    @default(0)
+  items        String   // JSON earnings/deductions breakdown
+  notes        String?
+  status       String   @default("issued") // draft | issued
+  issuedAt     DateTime?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  employee     Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+
+  @@unique([employeeId, year, month])
 }
 
 model Setting {

@@ -10,6 +10,8 @@ import { TimesheetsView } from "@/components/views/timesheets";
 import { LeaveView } from "@/components/views/leave";
 import { ComplaintsView } from "@/components/views/complaints";
 import { LoansView } from "@/components/views/loans";
+import { PayrollView } from "@/components/views/payroll";
+import { EmployeePortal } from "@/components/views/employee-portal";
 import { FormsView } from "@/components/views/forms";
 import { FleetView } from "@/components/views/fleet";
 import { FactoryReportsView } from "@/components/views/factory-reports";
@@ -23,15 +25,31 @@ export function AppShell() {
   const activeSection = useAppStore((s) => s.activeSection);
   const setActiveSection = useAppStore((s) => s.setActiveSection);
 
-  // Sync section from URL query param on mount (for PWA shortcuts)
+  // Sync section from URL query param on mount (for PWA shortcuts).
+  // ?app=employee opens the dedicated employee self-service app.
+  // Bare "/" always resets to the manager suite.
   useEffect(() => {
     if (typeof window === "undefined") return;
     const params = new URLSearchParams(window.location.search);
+    const app = params.get("app");
+    if (app === "employee") {
+      setActiveSection("employee-portal" as never);
+      return;
+    }
+    if (!params.get("section") && useAppStore.getState().activeSection === ("employee-portal" as never)) {
+      setActiveSection("dashboard");
+      return;
+    }
     const section = params.get("section");
     if (section && NAV_ITEMS.some((n) => n.id === section)) {
       setActiveSection(section as never);
     }
   }, [setActiveSection]);
+
+  // Employee app runs standalone — full-screen, no manager chrome.
+  if (activeSection === "employee-portal") {
+    return <EmployeePortal />;
+  }
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
@@ -50,6 +68,7 @@ export function AppShell() {
               {activeSection === "leave" && <LeaveView />}
               {activeSection === "complaints" && <ComplaintsView />}
               {activeSection === "loans" && <LoansView />}
+              {activeSection === "payroll" && <PayrollView />}
               {activeSection === "forms" && <FormsView />}
               {activeSection === "fleet" && <FleetView />}
               {activeSection === "factory-reports" && <FactoryReportsView />}

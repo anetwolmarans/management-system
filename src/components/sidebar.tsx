@@ -5,7 +5,7 @@ import { useAppStore } from "@/lib/store";
 import { NAV_ITEMS } from "@/lib/nav";
 import { cn } from "@/lib/utils";
 import { BaywashLogo } from "@/components/baywash-logo";
-import { ChevronsLeft } from "lucide-react";
+import { ChevronsLeft, Smartphone } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
@@ -64,6 +64,23 @@ export function Sidebar() {
           );
         })}
       </nav>
+
+      {/* Employee app shortcut */}
+      <div className="px-2.5 pb-1 shrink-0">
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => setActiveSection("employee-portal")}
+          title={collapsed ? "Open Employee App" : undefined}
+          className={cn(
+            "w-full justify-center gap-2 text-[#00AEEF] hover:bg-sidebar-accent hover:text-[#00AEEF] rounded-full font-semibold",
+            !collapsed && "justify-start px-3",
+          )}
+        >
+          <Smartphone className="h-4 w-4 shrink-0" />
+          {!collapsed && <span>Employee App</span>}
+        </Button>
+      </div>
 
       {/* User card */}
       {!collapsed && (
