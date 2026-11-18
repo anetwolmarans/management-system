@@ -22,18 +22,18 @@ async function main() {
 
   // ---------- Employees ----------
   const employees = [
-    { name: "Sarah Chen", email: "sarah.chen@baywashgroup.com", phone: "+1 555 0101", position: "Operations Manager", department: "Operations", salary: 8200 },
-    { name: "Marcus Reyes", email: "marcus.reyes@baywashgroup.com", phone: "+1 555 0102", position: "Driver", department: "Logistics", salary: 3400 },
-    { name: "Priya Patel", email: "priya.patel@baywashgroup.com", phone: "+1 555 0103", position: "Sales Rep", department: "Sales", salary: 4200 },
-    { name: "David Okafor", email: "david.okafor@baywashgroup.com", phone: "+1 555 0104", position: "Field Technician", department: "Engineering", salary: 5100 },
-    { name: "Emma Lindqvist", email: "emma.l@baywashgroup.com", phone: "+1 555 0105", position: "HR Specialist", department: "HR", salary: 4800 },
-    { name: "Tom Bradley", email: "tom.bradley@baywashgroup.com", phone: "+1 555 0106", position: "Driver", department: "Logistics", salary: 3300 },
-    { name: "Lena Fischer", email: "lena.fischer@baywashgroup.com", phone: "+1 555 0107", position: "Accountant", department: "Finance", salary: 5600 },
-    { name: "Carlos Mendoza", email: "carlos.m@baywashgroup.com", phone: "+1 555 0108", position: "Dispatcher", department: "Operations", salary: 3900 },
-    { name: "Aisha Khan", email: "aisha.khan@baywashgroup.com", phone: "+1 555 0109", position: "Sales Rep", department: "Sales", salary: 4400 },
-    { name: "Robert Liu", email: "robert.liu@baywashgroup.com", phone: "+1 555 0110", position: "Engineer", department: "Engineering", salary: 7200 },
-    { name: "Nina Petrova", email: "nina.p@baywashgroup.com", phone: "+1 555 0111", position: "Driver", department: "Logistics", salary: 3350 },
-    { name: "James O'Brien", email: "james.ob@baywashgroup.com", phone: "+1 555 0112", position: "Field Technician", department: "Engineering", salary: 4950 },
+    { name: "Sarah Chen", email: "sarah.chen@managementsystem.com", phone: "+1 555 0101", position: "Operations Manager", department: "Operations", salary: 8200 },
+    { name: "Marcus Reyes", email: "marcus.reyes@managementsystem.com", phone: "+1 555 0102", position: "Driver", department: "Logistics", salary: 3400 },
+    { name: "Priya Patel", email: "priya.patel@managementsystem.com", phone: "+1 555 0103", position: "Sales Rep", department: "Sales", salary: 4200 },
+    { name: "David Okafor", email: "david.okafor@managementsystem.com", phone: "+1 555 0104", position: "Field Technician", department: "Engineering", salary: 5100 },
+    { name: "Emma Lindqvist", email: "emma.l@managementsystem.com", phone: "+1 555 0105", position: "HR Specialist", department: "HR", salary: 4800 },
+    { name: "Tom Bradley", email: "tom.bradley@managementsystem.com", phone: "+1 555 0106", position: "Driver", department: "Logistics", salary: 3300 },
+    { name: "Lena Fischer", email: "lena.fischer@managementsystem.com", phone: "+1 555 0107", position: "Accountant", department: "Finance", salary: 5600 },
+    { name: "Carlos Mendoza", email: "carlos.m@managementsystem.com", phone: "+1 555 0108", position: "Dispatcher", department: "Operations", salary: 3900 },
+    { name: "Aisha Khan", email: "aisha.khan@managementsystem.com", phone: "+1 555 0109", position: "Sales Rep", department: "Sales", salary: 4400 },
+    { name: "Robert Liu", email: "robert.liu@managementsystem.com", phone: "+1 555 0110", position: "Engineer", department: "Engineering", salary: 7200 },
+    { name: "Nina Petrova", email: "nina.p@managementsystem.com", phone: "+1 555 0111", position: "Driver", department: "Logistics", salary: 3350 },
+    { name: "James O'Brien", email: "james.ob@managementsystem.com", phone: "+1 555 0112", position: "Field Technician", department: "Engineering", salary: 4950 },
   ];
 
   const createdEmployees = [];
@@ -41,7 +41,7 @@ async function main() {
     const e = employees[i];
     const emp = await db.employee.create({
       data: {
-        employeeNo: `BW-${String(1001 + i).padStart(4, "0")}`,
+        employeeNo: `MS-${String(1001 + i).padStart(4, "0")}`,
         name: e.name,
         email: e.email,
         phone: e.phone,
@@ -51,7 +51,7 @@ async function main() {
         salary: e.salary,
         status: i === 11 ? "on-leave" : "active",
         avatar: null,
-        // Default portal PIN = last 4 digits of the employee number (e.g. BW-1002 → 1002)
+        // Default portal PIN = last 4 digits of the employee number (e.g. MS-1002 → 1002)
         pin: String(1001 + i).slice(-4),
       },
     });
@@ -171,25 +171,25 @@ async function main() {
 
   // ---------- Vehicles (with purchase data) ----------
   const vehicles = [
-    { plateNumber: "BW-101-A", brand: "Ford", model: "Transit", year: 2022, type: "van", assignedTo: "Marcus Reyes", mileage: 48230, fuelLevel: 75,
+    { plateNumber: "MS-101-A", brand: "Ford", model: "Transit", year: 2022, type: "van", assignedTo: "Marcus Reyes", mileage: 48230, fuelLevel: 75,
       vin: "1FTBR1X8XNKA12345", purchasePrice: 42000, purchaseDate: new Date(2022, 2, 14), supplier: "City Ford Dealership", color: "White",
       insuranceExpiry: new Date(2027, 2, 14), registrationExpiry: new Date(2027, 5, 30) },
-    { plateNumber: "BW-102-B", brand: "Mercedes", model: "Sprinter", year: 2023, type: "van", assignedTo: "Tom Bradley", mileage: 21340, fuelLevel: 60,
+    { plateNumber: "MS-102-B", brand: "Mercedes", model: "Sprinter", year: 2023, type: "van", assignedTo: "Tom Bradley", mileage: 21340, fuelLevel: 60,
       vin: "WD3PE8CC8P5123456", purchasePrice: 58000, purchaseDate: new Date(2023, 5, 1), supplier: "Star Motors", color: "Silver",
       insuranceExpiry: new Date(2027, 5, 1), registrationExpiry: new Date(2027, 8, 15) },
-    { plateNumber: "BW-103-C", brand: "Isuzu", model: "NPR", year: 2021, type: "truck", assignedTo: null, mileage: 92110, fuelLevel: 40,
+    { plateNumber: "MS-103-C", brand: "Isuzu", model: "NPR", year: 2021, type: "truck", assignedTo: null, mileage: 92110, fuelLevel: 40,
       vin: "JALCD58R670012345", purchasePrice: 78000, purchaseDate: new Date(2021, 0, 20), supplier: "TruckZone Commercial", color: "Yellow",
       insuranceExpiry: new Date(2026, 11, 1), registrationExpiry: new Date(2027, 0, 20) },
-    { plateNumber: "BW-104-D", brand: "Toyota", model: "Hilux", year: 2024, type: "truck", assignedTo: "Nina Petrova", mileage: 8900, fuelLevel: 90,
+    { plateNumber: "MS-104-D", brand: "Toyota", model: "Hilux", year: 2024, type: "truck", assignedTo: "Nina Petrova", mileage: 8900, fuelLevel: 90,
       vin: "AHTKB8CD403123456", purchasePrice: 46000, purchaseDate: new Date(2024, 1, 10), supplier: "Toyota Eastgate", color: "Graphite",
       insuranceExpiry: new Date(2028, 1, 10), registrationExpiry: new Date(2028, 1, 10) },
-    { plateNumber: "BW-105-E", brand: "Volkswagen", model: "Caddy", year: 2020, type: "van", assignedTo: null, mileage: 124500, fuelLevel: 25,
+    { plateNumber: "MS-105-E", brand: "Volkswagen", model: "Caddy", year: 2020, type: "van", assignedTo: null, mileage: 124500, fuelLevel: 25,
       vin: "WVWZZZ2KZAW012345", purchasePrice: 28000, purchaseDate: new Date(2020, 4, 22), supplier: "VW Fleet Sales", color: "Blue",
       insuranceExpiry: new Date(2026, 9, 22), registrationExpiry: new Date(2026, 11, 30) },
-    { plateNumber: "BW-106-F", brand: "Honda", model: "PCX", year: 2023, type: "motorcycle", assignedTo: "Carlos Mendoza", mileage: 5600, fuelLevel: 80,
+    { plateNumber: "MS-106-F", brand: "Honda", model: "PCX", year: 2023, type: "motorcycle", assignedTo: "Carlos Mendoza", mileage: 5600, fuelLevel: 80,
       vin: "JH2MF6500PK001234", purchasePrice: 4800, purchaseDate: new Date(2023, 7, 5), supplier: "Rider Honda", color: "Red",
       insuranceExpiry: new Date(2027, 7, 5), registrationExpiry: new Date(2027, 7, 5) },
-    { plateNumber: "BW-107-G", brand: "Ford", model: "Ranger", year: 2022, type: "truck", assignedTo: "James O'Brien", mileage: 31200, fuelLevel: 55,
+    { plateNumber: "MS-107-G", brand: "Ford", model: "Ranger", year: 2022, type: "truck", assignedTo: "James O'Brien", mileage: 31200, fuelLevel: 55,
       vin: "1FTYR14C9NKA12345", purchasePrice: 51000, purchaseDate: new Date(2022, 8, 12), supplier: "City Ford Dealership", color: "Black",
       insuranceExpiry: new Date(2027, 8, 12), registrationExpiry: new Date(2027, 8, 12) },
   ];
@@ -501,7 +501,7 @@ async function main() {
   }
 
   // ---------- Daily Factory Reports (multi-site operational reports) ----------
-  // Modeled on the BAYWASH CLEANING daily factory report format.
+  // Modeled on the MANAGEMENT SYSTEM · CLEANING daily factory report format.
   const factoryReportSections = [
     {
       id: "s1",
@@ -579,7 +579,7 @@ async function main() {
     data: {
       title: "Daily Factory Report — 24 June 2026",
       reportDate: new Date("2026-06-24"),
-      company: "BAYWASH CLEANING",
+      company: "MANAGEMENT SYSTEM · CLEANING",
       frequency: "DAILY",
       compiledBy: "FRANS AND COETZEE",
       compiledFor: "OPERATIONS TEAM",
@@ -594,7 +594,7 @@ async function main() {
     data: {
       title: "Daily Factory Report — 23 June 2026",
       reportDate: new Date("2026-06-23"),
-      company: "BAYWASH CLEANING",
+      company: "MANAGEMENT SYSTEM · CLEANING",
       frequency: "DAILY",
       compiledBy: "FRANS",
       compiledFor: "OPERATIONS TEAM",
@@ -622,7 +622,7 @@ async function main() {
     data: {
       title: "Daily Factory Report — 22 June 2026",
       reportDate: new Date("2026-06-22"),
-      company: "BAYWASH CLEANING",
+      company: "MANAGEMENT SYSTEM · CLEANING",
       frequency: "DAILY",
       compiledBy: "COETZEE",
       compiledFor: "OPERATIONS TEAM",
@@ -751,7 +751,7 @@ async function main() {
       createdBy: "Emma Lindqvist",
       data: JSON.stringify({
         employeeName: "Marcus Reyes",
-        companyNo: "BW-1002",
+        companyNo: "MS-1002",
         section: "Logistics",
         l1Opts: ["FULL"],
         l1From: "2026-12-01",
@@ -835,7 +835,7 @@ async function main() {
     }
   }
 
-  await db.setting.create({ data: { key: "company.name", value: "BAYWASH Group" } });
+  await db.setting.create({ data: { key: "company.name", value: "Management System" } });
   await db.setting.create({ data: { key: "company.currency", value: "USD" } });
   await db.setting.create({ data: { key: "leave.annual.allowance", value: "21" } });
 

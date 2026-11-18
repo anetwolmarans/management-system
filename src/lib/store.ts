@@ -1,4 +1,4 @@
-// Global UI state for BAYWASH Group manager workspace — active section + sidebar state.
+// Global UI state for the Management System manager workspace — active section + sidebar state.
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 

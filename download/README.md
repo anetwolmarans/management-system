@@ -1,6 +1,6 @@
-# BAYWASH Group — Manager Dashboard & Employee App
+# Management System & Employee App
 
-A unified manager workspace for **BAYWASH Group** that runs as both a **web app** and an installable **PWA (APK-style)** on Android, designed to be as useful as Smartsheet for cross-team operations — plus a dedicated **Employee App** where staff check their payslips, leave approvals and personal info.
+A unified manager workspace for **Management System** that runs as both a **web app** and an installable **PWA (APK-style)** on Android, designed to be as useful as Smartsheet for cross-team operations — plus a dedicated **Employee App** where staff check their payslips, leave approvals and personal info.
 
 ## Features
 
@@ -15,20 +15,20 @@ A unified manager workspace for **BAYWASH Group** that runs as both a **web app*
 | **Payroll** | **Monthly payslip run** — generate payslips for all employees in one click (computed from salary, approved timesheet hours at 1.5× overtime rate, transport allowances, performance bonuses, and active staff-loan installments; deductions = PAYE 12% + social security + pension). Add slips manually, review gross/deductions/net per period, download branded PDFs, delete slips. Issued slips **appear instantly in each employee's app** |
 | **Employee App** | A standalone **Android-style self-service portal** (`/?app=employee`, also in the PWA shortcuts and the sidebar “Employee App” button). Staff sign in with **employee number or email + PIN** (default PIN = last 4 digits of the employee number) and get: **Home** (latest payslip with net pay + one-tap PDF download, live leave-approval status, loan balance, quick stats), **Payslips** (query by year/month/free-text and open any slip's earnings/deductions breakdown, download as branded PDF), **Leave** (approval status of every request in color-coded badges + submit new requests straight to the manager), **Profile** (personal info, base salary, staff loan, year-to-date totals, sign-out) |
 | **Fleet** | Vehicle registry with **purchase data** (price, date, VIN, supplier, insurance & registration expiry), **weekly driver inspections** (10-point checklist that auto-flags the fleet controller on warning/fail), **service history** with parts replaced (oil, filters, tires, brake pads, batteries), **recurring maintenance schedule** (oil change, wheel rotation, brake inspection, etc.) with **overdue / due-soon / OK** status, and a per-vehicle **history timeline** drawer combining inspections + services |
-| **Factory Reports** | Multi-site daily operational reports (e.g. BAYWASH CLEANING). Each report covers multiple sites (HANGANA, BHL, BACHMUS, DEEP OCEAN, PEREIRA) with categorized action items: **Cleaning Findings, Machinery, Personnel, PPE/Equipment, Other**. Every item tracks description, action needed, responsible person, and status (open / in-progress / resolved). Export to text format that matches the original report layout. |
-| **Company Forms** | The five **official BAYWASH paper forms** digitized — fill them in on screen and **download as a branded PDF** ready to print, sign and send to a client or employee. Includes the full doc-control header (REV/DATE, DOC. NAME, REVIEW NR, CREATED BY, APPROVED BY), navy section banners, YES/NO tick boxes, the leave-table layout, signature lines and page numbers:
-  - **BWCW-IR-01 · Incident Report Form** (BAYWASH CARWASH)
-  - **BWG-ARF-2024 · Accident Report Form** (BAYWASH GROUP) — driver details, accident details, damage, witnesses
-  - **BWG-CCF-01 · Customer Complaint Form** (BAYWASH GROUP)
-  - **BWC-CNF-2024 · Customer Notification Form** (BAYWASH CLEANING) — with purpose blurb & quality-supervisor sign-off
-  - **BC-MLAF-01 · Multi Leave Application Form** (BAYWASH CLEANING) — 6 leave types, unpaid/AWOL table, payments required |
+| **Factory Reports** | Multi-site daily operational reports (e.g. MANAGEMENT SYSTEM · CLEANING). Each report covers multiple sites (HANGANA, BHL, BACHMUS, DEEP OCEAN, PEREIRA) with categorized action items: **Cleaning Findings, Machinery, Personnel, PPE/Equipment, Other**. Every item tracks description, action needed, responsible person, and status (open / in-progress / resolved). Export to text format that matches the original report layout. |
+| **Company Forms** | The five **official company paper forms** digitized — fill them in on screen and **download as a branded PDF** ready to print, sign and send to a client or employee. Includes the full doc-control header (REV/DATE, DOC. NAME, REVIEW NR, CREATED BY, APPROVED BY), navy section banners, YES/NO tick boxes, the leave-table layout, signature lines and page numbers:
+  - **MS-CW-IR-01 · Incident Report Form** (MANAGEMENT SYSTEM · CAR WASH)
+  - **MS-ARF-2024 · Accident Report Form** (MANAGEMENT SYSTEM) — driver details, accident details, damage, witnesses
+  - **MS-CCF-01 · Customer Complaint Form** (MANAGEMENT SYSTEM)
+  - **MS-CNF-2024 · Customer Notification Form** (MANAGEMENT SYSTEM · CLEANING) — with purpose blurb & quality-supervisor sign-off
+  - **MS-MLAF-01 · Multi Leave Application Form** (MANAGEMENT SYSTEM · CLEANING) — 6 leave types, unpaid/AWOL table, payments required |
 | **Weekly Reports** | Auto-generated operational summaries, export to text |
 | **Sheets** | Smartsheet-style grids — custom columns (text/number/select/date), CSV export |
 
 ## Payslip PDF
 
-- Branded A4 document generated server-side with pdfkit: navy header with the BAYWASH mark, employee info grid, side-by-side **Earnings / Deductions** tables, highlighted **NET PAY** banner, **year-to-date** totals, declaration and HR contact line.
-- Filename: `BAYWASH_Payslip_<Name>_<YYYY-MM>.pdf` — opens in a new tab for printing/saving, or can be sent to the employee or a client (e.g. bank proof of income).
+- Branded A4 document generated server-side with pdfkit: navy header with the brand mark, employee info grid, side-by-side **Earnings / Deductions** tables, highlighted **NET PAY** banner, **year-to-date** totals, declaration and HR contact line.
+- Filename: `Payslip_<Name>_<YYYY-MM>.pdf` — opens in a new tab for printing/saving, or can be sent to the employee or a client (e.g. bank proof of income).
 - Employees can only fetch their **own** slips (ownership check on the PDF endpoint).
 
 ## Company Forms highlights
@@ -36,7 +36,7 @@ A unified manager workspace for **BAYWASH Group** that runs as both a **web app*
 - **Faithful to the originals** — each PDF reproduces the paper document: logo header, doc-control table, company strip, section banners, fill-in boxes, checkboxes, signature lines and date fields.
 - **Auto document IDs** — new forms are pre-filled with the next sequential ID (e.g. `IR-2026-0002`, `CC-2026-0001`).
 - **Required-field validation** — the Save buttons stay disabled until the mandatory fields (marked `*`) are filled.
-- **Save & download PDF** — one click saves the submission and downloads the branded PDF (filename like `BWCW-IR-01_IR-2026-0001.pdf`).
+- **Save & download PDF** — one click saves the submission and downloads the branded PDF (filename like `MS-CW-IR-01_IR-2026-0001.pdf`).
 - **Printed signatory names** — optional name fields appear under the signature lines for sending documents without printing names by hand.
 - **Edit anytime** — reopen any saved form, update it and re-download the PDF.
 
@@ -51,7 +51,7 @@ A unified manager workspace for **BAYWASH Group** that runs as both a **web app*
 
 ## Design system
 
-- **Brand palette (from the BAYWASH Group logo):** deep navy `#01205E` (sidebar, primary buttons, wordmark) + brand cyan `#00AEEF` (water-drop accent, active nav items, charts)
+- **Brand palette (from the Management System logo):** deep navy `#01205E` (sidebar, primary buttons, wordmark) + brand cyan `#00AEEF` (water-drop accent, active nav items, charts)
 - **Logo:** custom SVG mark — two cupped hands holding a water drop — in the sidebar, mobile nav, and PWA icons
 - **Accents:** cyan, emerald, amber, rose, violet, orange — used for status badges and chart series
 - **Light & dark themes** with refined contrast and navy sidebar
@@ -99,9 +99,9 @@ src/lib/store.ts             — Zustand UI state (active section, sidebar, mobi
 
 | Employee | Employee number | PIN |
 | --- | --- | --- |
-| Marcus Reyes | `BW-1002` | `1002` |
-| Sarah Chen | `BW-1001` | `1001` |
-| …any employee | `BW-10XX` | `10XX` (last 4 digits of the number) |
+| Marcus Reyes | `MS-1002` | `1002` |
+| Sarah Chen | `MS-1001` | `1001` |
+| …any employee | `MS-10XX` | `10XX` (last 4 digits of the number) |
 
 ## Dev commands
 

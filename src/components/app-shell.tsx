@@ -78,7 +78,7 @@ export function AppShell() {
           </main>
 
           <footer className="border-t bg-background px-4 py-3 text-xs text-muted-foreground flex flex-col sm:flex-row items-center justify-between gap-1">
-            <span>BAYWASH Group — unified ops dashboard</span>
+            <span>Management System — unified ops dashboard</span>
             <span className="text-[10px]">Tip: install to home screen for app-like access (PWA)</span>
           </footer>
         </div>

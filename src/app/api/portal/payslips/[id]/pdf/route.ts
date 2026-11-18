@@ -1,4 +1,4 @@
-// Download an employee's payslip as a branded BAYWASH PDF document.
+// Download an employee's payslip as a branded PDF document.
 import { db } from "@/lib/db";
 import { err } from "@/lib/api";
 import { generatePayslipPdf, PayslipLine } from "@/lib/payslip-pdf";
@@ -70,7 +70,7 @@ export async function GET(req: Request, ctx: Ctx) {
       hireDate: new Date(slip.employee.hireDate).toLocaleDateString("en-GB", {
         day: "2-digit", month: "short", year: "numeric",
       }),
-      bankRef: `BW-${slip.employee.employeeNo.slice(-4)}-XXXX`,
+      bankRef: `MS-${slip.employee.employeeNo.slice(-4)}-XXXX`,
     },
     hours: slip.hours,
     gross: slip.gross,
@@ -83,7 +83,7 @@ export async function GET(req: Request, ctx: Ctx) {
     ytd,
   });
 
-  const filename = `BAYWASH_Payslip_${slip.employee.name.replace(/[^a-zA-Z0-9]+/g, "_")}_${slip.year}-${String(slip.month).padStart(2, "0")}.pdf`;
+  const filename = `Payslip_${slip.employee.name.replace(/[^a-zA-Z0-9]+/g, "_")}_${slip.year}-${String(slip.month).padStart(2, "0")}.pdf`;
 
   return new Response(new Uint8Array(buffer), {
     status: 200,

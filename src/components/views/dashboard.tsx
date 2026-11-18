@@ -45,7 +45,7 @@ interface DashboardData {
   pendingLeaveList: { id: string; type: string; days: number; employee?: { name: string } }[];
 }
 
-// BAYWASH brand chart palette: navy, cyan, mid-blue, sky, slate + status tones
+// Brand chart palette: navy, cyan, mid-blue, sky, slate + status tones
 const PIE_COLORS = ["#01205E", "#00AEEF", "#018DC5", "#3B5899", "#7FCBEC", "#F0625D", "#94A8D8"];
 
 export function DashboardView() {
@@ -78,7 +78,7 @@ export function DashboardView() {
 
   return (
     <div className="space-y-6">
-      {/* Hero banner — gradient cyan→navy, BAYWASH brand */}
+      {/* Hero banner — gradient cyan→navy, brand */}
       <div className="hero-gradient rounded-2xl p-5 md:p-6 relative overflow-hidden">
         <div className="absolute -right-8 -top-10 h-40 w-40 rounded-full bg-white/10" aria-hidden="true" />
         <div className="absolute -right-2 top-16 h-24 w-24 rounded-full bg-white/10" aria-hidden="true" />

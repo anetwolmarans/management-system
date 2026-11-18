@@ -1,5 +1,5 @@
 // ============================================================
-// BAYWASH Group — official company form templates.
+// Management System — official company form templates.
 // Field definitions are the single source of truth for:
 //   • the fill-in UI (src/components/views/forms.tsx)
 //   • stored submissions (FormSubmission.data JSON)
@@ -78,16 +78,16 @@ export type FormData = Record<string, FormDataValue>;
 const NAVY = "#01205E";
 
 // ------------------------------------------------------------
-// 1. BWCW-IR-01 — Incident Report Form (BAYWASH CARWASH)
+// 1. MS-CW-IR-01 — Incident Report Form (MANAGEMENT SYSTEM · CAR WASH)
 // ------------------------------------------------------------
 const incidentReport: FormTemplate = {
   id: "incident-report",
-  docId: "BWCW-IR-01",
+  docId: "MS-CW-IR-01",
   title: "Incident Report Form",
-  company: "BAYWASH CARWASH",
+  company: "MANAGEMENT SYSTEM · CAR WASH",
   meta: [
     { label: "REV/DATE", value: "19/07/2024" },
-    { label: "DOC. NAME", value: "BWCW-IR-01" },
+    { label: "DOC. NAME", value: "MS-CW-IR-01" },
     { label: "REVIEW DATE", value: "19/07/2024" },
     { label: "REVIEW NR", value: "00" },
     { label: "CREATED BY", value: "DIRK BOSMAN" },
@@ -123,16 +123,16 @@ const incidentReport: FormTemplate = {
 };
 
 // ------------------------------------------------------------
-// 2. BWG-ARF-2024 — Accident Report Form (BAYWASH GROUP)
+// 2. MS-ARF-2024 — Accident Report Form (MANAGEMENT SYSTEM)
 // ------------------------------------------------------------
 const accidentReport: FormTemplate = {
   id: "accident-report",
-  docId: "BWG-ARF-2024",
+  docId: "MS-ARF-2024",
   title: "Accident Report Form",
-  company: "BAYWASH GROUP",
+  company: "MANAGEMENT SYSTEM",
   meta: [
     { label: "REV/DATE", value: "16/09/2024" },
-    { label: "DOC. NAME", value: "BWG-ARF-2024" },
+    { label: "DOC. NAME", value: "MS-ARF-2024" },
     { label: "REVIEW DATE", value: "03/09/2025" },
     { label: "REVIEW NR", value: "01" },
     { label: "CREATED BY", value: "Admin" },
@@ -196,16 +196,16 @@ const accidentReport: FormTemplate = {
 };
 
 // ------------------------------------------------------------
-// 3. BWG-CCF-01 — Customer Complaint Form (BAYWASH GROUP)
+// 3. MS-CCF-01 — Customer Complaint Form (MANAGEMENT SYSTEM)
 // ------------------------------------------------------------
 const customerComplaint: FormTemplate = {
   id: "customer-complaint",
-  docId: "BWG-CCF-01",
+  docId: "MS-CCF-01",
   title: "Customer Complaint Form",
-  company: "BAYWASH GROUP",
+  company: "MANAGEMENT SYSTEM",
   meta: [
     { label: "REV/DATE", value: "03/09/2024" },
-    { label: "DOC. NAME", value: "BWG-CCF-01" },
+    { label: "DOC. NAME", value: "MS-CCF-01" },
     { label: "REVIEW DATE", value: "03/09/2024" },
     { label: "REVIEW NR", value: "01" },
     { label: "CREATED BY", value: "Admin" },
@@ -255,17 +255,17 @@ const customerComplaint: FormTemplate = {
 };
 
 // ------------------------------------------------------------
-// 4. BWC-CNF-2024 — Customer Notification Form (BAYWASH CLEANING)
+// 4. MS-CNF-2024 — Customer Notification Form (MANAGEMENT SYSTEM · CLEANING)
 // ------------------------------------------------------------
 const customerNotification: FormTemplate = {
   id: "customer-notification",
-  docId: "BWC-CNF-2024",
+  docId: "MS-CNF-2024",
   docIdLabel: "DOC. NO",
   title: "Customer Notification Form",
-  company: "BAYWASH CLEANING",
+  company: "MANAGEMENT SYSTEM · CLEANING",
   meta: [
     { label: "REV/DATE", value: "09.07.2023" },
-    { label: "DOC. NO", value: "BWC-CNF-2024" },
+    { label: "DOC. NO", value: "MS-CNF-2024" },
     { label: "NEXT REVIEW DATE", value: "10.07.2024" },
     { label: "REVIEW NR", value: "02" },
     { label: "CREATED BY", value: "Dirk Bosman" },
@@ -318,11 +318,11 @@ const customerNotification: FormTemplate = {
     },
   ],
   signBlocks: [],
-  supervisor: { role: "Baywash Quality Supervisor", name: "Frans Dausab" },
+  supervisor: { role: "Quality Supervisor", name: "Frans Dausab" },
 };
 
 // ------------------------------------------------------------
-// 5. BC-MLAF-01 — Multi Leave Application Form (BAYWASH CLEANING)
+// 5. MS-MLAF-01 — Multi Leave Application Form (MANAGEMENT SYSTEM · CLEANING)
 // ------------------------------------------------------------
 export interface LeaveRowDef {
   no: number;
@@ -344,12 +344,12 @@ export const LEAVE_ROWS: LeaveRowDef[] = [
 
 const leaveApplication: FormTemplate = {
   id: "leave-application",
-  docId: "BC-MLAF-01",
+  docId: "MS-MLAF-01",
   title: "Multi Leave Application Form",
-  company: "BAYWASH CLEANING",
+  company: "MANAGEMENT SYSTEM · CLEANING",
   meta: [
     { label: "REV/DATE", value: "06/04/2021" },
-    { label: "DOC. NAME", value: "BC-MLAF-01" },
+    { label: "DOC. NAME", value: "MS-MLAF-01" },
     { label: "REVIEW DATE", value: "05/04/2022" },
     { label: "REVIEW NR", value: "00" },
     { label: "CREATED BY", value: "TJ Engelbrecht" },

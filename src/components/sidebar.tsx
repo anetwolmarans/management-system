@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useAppStore } from "@/lib/store";
 import { NAV_ITEMS } from "@/lib/nav";
 import { cn } from "@/lib/utils";
-import { BaywashLogo } from "@/components/baywash-logo";
+import { BrandLogo } from "@/components/brand-logo";
 import { ChevronsLeft, Smartphone } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -25,12 +25,12 @@ export function Sidebar() {
       {/* Brand header */}
       <div className="flex items-center h-16 px-4 shrink-0 border-b border-sidebar-border">
         <Link href="/" className="flex items-center gap-2.5 overflow-hidden">
-          <BaywashLogo variant="inverse" className="h-9 w-9 shrink-0" />
+          <BrandLogo variant="inverse" className="h-9 w-9 shrink-0" />
           {!collapsed && (
             <div className="flex flex-col leading-tight overflow-hidden">
-              <span className="font-extrabold text-[15px] tracking-wide text-white">BAYWASH</span>
+              <span className="font-extrabold text-[14px] tracking-wide text-white">Management System</span>
               <span className="text-[9px] text-[#00AEEF] font-bold uppercase tracking-[0.18em]">
-                Group · Manager Suite
+                Manager Suite
               </span>
             </div>
           )}

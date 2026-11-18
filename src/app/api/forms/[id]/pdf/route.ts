@@ -1,4 +1,4 @@
-// Download a filled form as the official BAYWASH PDF document.
+// Download a filled form as the official PDF document.
 import { db } from "@/lib/db";
 import { err } from "@/lib/api";
 import { getTemplate, FormData } from "@/lib/forms";

@@ -4,7 +4,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sh
 import { useAppStore } from "@/lib/store";
 import { NAV_ITEMS } from "@/lib/nav";
 import { cn } from "@/lib/utils";
-import { BaywashLogo } from "@/components/baywash-logo";
+import { BrandLogo } from "@/components/brand-logo";
 
 export function MobileNav() {
   const open = useAppStore((s) => s.mobileNavOpen);
@@ -17,11 +17,11 @@ export function MobileNav() {
       <SheetContent side="left" className="w-72 p-0">
         <SheetHeader className="px-4 py-4 border-b">
           <SheetTitle className="flex items-center gap-2">
-            <BaywashLogo className="h-8 w-8" />
+            <BrandLogo className="h-8 w-8" />
             <div className="flex flex-col leading-tight">
-              <span className="font-extrabold text-sm tracking-wide text-[#01205E]">BAYWASH</span>
+              <span className="font-extrabold text-sm tracking-wide text-[#01205E]">Management System</span>
               <span className="text-[9px] text-muted-foreground font-normal uppercase tracking-[0.15em]">
-                Group · Manager Suite
+                Manager Suite
               </span>
             </div>
           </SheetTitle>

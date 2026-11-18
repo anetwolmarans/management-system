@@ -20,11 +20,10 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "BAYWASH Group — Manager Dashboard",
+  title: "Management System",
   description:
-    "BAYWASH Group manager workspace: employees, hours, leave, complaints, loans, fleet tracking, factory reports, weekly reports and Smartsheet-style sheets.",
+    "Management System — unified workspace: employees, hours, leave, complaints, loans, fleet tracking, factory reports, weekly reports and Smartsheet-style sheets.",
   keywords: [
-    "BAYWASH",
     "WorkHub",
     "employee management",
     "HR",
@@ -37,19 +36,19 @@ export const metadata: Metadata = {
     "weekly reports",
     "smartsheet",
   ],
-  authors: [{ name: "BAYWASH Group" }],
+  authors: [{ name: "Management System" }],
   manifest: "/manifest.webmanifest",
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
-    title: "BAYWASH Group",
+    title: "Management System",
   },
   icons: {
     icon: "/icon.svg",
     apple: "/icon.svg",
   },
   openGraph: {
-    title: "BAYWASH Group — Manager Dashboard",
+    title: "Management System",
     description: "Unified manager workspace for employees, fleet, and operations.",
     type: "website",
   },

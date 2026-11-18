@@ -1,4 +1,4 @@
-// Official BAYWASH company forms — list + create submissions.
+// Official company forms — list + create submissions.
 import { db } from "@/lib/db";
 import { json, err, parseBody } from "@/lib/api";
 import { getTemplate, templateFieldKeys, FormData, suggestDocId } from "@/lib/forms";

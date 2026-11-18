@@ -1,5 +1,5 @@
 // ============================================================
-// BAYWASH Group — employee payslip PDF generator.
+// Management System — employee payslip PDF generator.
 // Branded A4 document: navy header with logo, employee info
 // grid, earnings / deductions tables, highlighted net pay,
 // year-to-date summary. Matches the "Deep Water" brand system.
@@ -61,7 +61,7 @@ export async function generatePayslipPdf(input: PayslipPdfInput): Promise<Buffer
     margin: M,
     info: {
       Title: `Payslip ${input.periodLabel} — ${input.employee.name}`,
-      Author: "BAYWASH Group",
+      Author: "Management System",
     },
   });
   const chunks: Buffer[] = [];
@@ -86,7 +86,7 @@ export async function generatePayslipPdf(input: PayslipPdfInput): Promise<Buffer
     /* logo optional */
   }
   doc.font("Helvetica-Bold").fontSize(7).fillColor(NAVY);
-  doc.text("BAYWASH GROUP", M, hy + HEADER_H - 16, { width: logoW, align: "center", lineBreak: false });
+  doc.text("MANAGEMENT SYSTEM", M, hy + HEADER_H - 16, { width: logoW, align: "center", lineBreak: false });
 
   doc.font("Helvetica-Bold").fontSize(17).fillColor(NAVY);
   doc.text("PAYSLIP", M + logoW + 12, hy + 12, { width: 210, align: "left", lineBreak: false });
@@ -112,7 +112,7 @@ export async function generatePayslipPdf(input: PayslipPdfInput): Promise<Buffer
   doc.rect(M, stripY, CONTENT_W, 16).fill(NAVY);
   doc.font("Helvetica-Bold").fontSize(7.5).fillColor("#ffffff");
   doc.text(
-    "BAYWASH GROUP  ·  HUMAN RESOURCES  ·  EMPLOYEE COMPENSATION STATEMENT",
+    "MANAGEMENT SYSTEM  ·  HUMAN RESOURCES  ·  EMPLOYEE COMPENSATION STATEMENT",
     M,
     stripY + 4.5,
     { width: CONTENT_W, align: "center", lineBreak: false, characterSpacing: 0.4 },
@@ -233,7 +233,7 @@ export async function generatePayslipPdf(input: PayslipPdfInput): Promise<Buffer
   y += doc.heightOfString(declaration, { width: CONTENT_W }) + 12;
 
   doc.font("Helvetica-Bold").fontSize(8).fillColor(NAVY);
-  doc.text("Queries? Contact HR: hr@baywashgroup.com  ·  +1 555 0105", M, y, {
+  doc.text("Queries? Contact HR: hr@managementsystem.com  ·  +1 555 0105", M, y, {
     width: CONTENT_W,
     lineBreak: false,
   });
@@ -245,7 +245,7 @@ export async function generatePayslipPdf(input: PayslipPdfInput): Promise<Buffer
     const fy = PAGE_H - M - 12;
     doc.font("Helvetica").fontSize(7).fillColor(FAINT);
     doc.text(
-      `BAYWASH Group · Payslip ${input.periodLabel} · ${input.employee.name} (${input.employee.employeeNo})`,
+      `Management System · Payslip ${input.periodLabel} · ${input.employee.name} (${input.employee.employeeNo})`,
       M,
       fy,
       { width: CONTENT_W - 90, lineBreak: false },

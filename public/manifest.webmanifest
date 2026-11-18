@@ -1,7 +1,7 @@
 {
-  "name": "BAYWASH Group — Manager Dashboard",
-  "short_name": "BAYWASH",
-  "description": "BAYWASH Group manager workspace: employees, hours, leave, complaints, loans, fleet, factory reports, sheets.",
+  "name": "Management System",
+  "short_name": "Management",
+  "description": "Management System — unified workspace: employees, hours, leave, complaints, loans, fleet, factory reports, sheets.",
   "start_url": "/",
   "display": "standalone",
   "orientation": "portrait-primary",

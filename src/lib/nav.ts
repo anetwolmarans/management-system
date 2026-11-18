@@ -32,7 +32,7 @@ export const NAV_ITEMS: NavItem[] = [
   { id: "complaints", label: "Complaints", short: "Cases", icon: MessageSquareWarning, description: "Issues & resolutions" },
   { id: "loans", label: "Loans", short: "Loans", icon: Banknote, description: "Advances & installments" },
   { id: "payroll", label: "Payroll", short: "Payroll", icon: ReceiptText, description: "Monthly payslips — generate, issue & download PDF" },
-  { id: "forms", label: "Company Forms", short: "Forms", icon: FileStack, description: "Official BAYWASH documents — fill in & export PDF" },
+  { id: "forms", label: "Company Forms", short: "Forms", icon: FileStack, description: "Official company documents — fill in & export PDF" },
   { id: "fleet", label: "Fleet", short: "Fleet", icon: Truck, description: "Vehicles, inspections & maintenance" },
   { id: "factory-reports", label: "Factory Reports", short: "Sites", icon: Factory, description: "Daily multi-site operational reports" },
   { id: "reports", label: "Weekly Reports", short: "Reports", icon: FileBarChart, description: "Operations summaries" },

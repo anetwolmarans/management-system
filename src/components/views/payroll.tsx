@@ -177,7 +177,7 @@ export function PayrollView() {
     <div>
       <SectionHeader
         title="Payroll"
-        description="Monthly payslips — employees see issued slips instantly in the BAYWASH employee app"
+        description="Monthly payslips — employees see issued slips instantly in the employee app"
         actions={
           <>
             <Button variant="outline" onClick={() => setAddOpen(true)} className="gap-2">
@@ -374,7 +374,7 @@ export function PayrollView() {
 
       <p className="text-[11px] text-muted-foreground mt-4 flex items-center gap-1.5">
         <ReceiptText className="h-3 w-3" />
-        Payslips marked “issued” appear immediately in each employee&apos;s BAYWASH app — e.g. issued {slips[0]?.issuedAt ? fmtDate(slips[0].issuedAt) : "—"}.
+        Payslips marked “issued” appear immediately in each employee&apos;s app — e.g. issued {slips[0]?.issuedAt ? fmtDate(slips[0].issuedAt) : "—"}.
       </p>
     </div>
   );

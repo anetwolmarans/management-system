@@ -44,8 +44,8 @@
 }
 
 /* ============================================================
-   BAYWASH Group Design System — "Deep Water" edition
-   Brand colors taken directly from the BAYWASH Group logo:
+   Management System Design System — "Deep Water" edition
+   Brand colors taken directly from the Management System logo:
    • Navy:     #01205E  (oklch 0.27 0.12 262) — wordmark, sidebar, primary buttons
    • Cyan:     #00AEEF  (oklch 0.71 0.15 233) — water drop, hands, active states
    • Mid blue: #3B5899  — supporting tone for charts / secondary text
@@ -62,7 +62,7 @@
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.24 0.045 262);
 
-  /* Primary — brand navy (the "BAYWASH" wordmark color) */
+  /* Primary — brand navy (the navy wordmark color) */
   --primary: oklch(0.30 0.115 262);
   --primary-foreground: oklch(0.99 0.003 240);
 
@@ -101,7 +101,7 @@
   --chart-4: oklch(0.80 0.09 230);   /* sky */
   --chart-5: oklch(0.45 0.07 250);   /* slate blue */
 
-  /* Sidebar — brand navy (like the BAYWASH wordmark) */
+  /* Sidebar — brand navy (like the navy wordmark) */
   --sidebar: oklch(0.27 0.115 262);
   --sidebar-foreground: oklch(0.97 0.008 240);
   --sidebar-primary: oklch(0.71 0.15 233);         /* cyan — active item */

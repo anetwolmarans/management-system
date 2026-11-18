@@ -1,5 +1,5 @@
 // ============================================================
-// BAYWASH Group — official form PDF generator.
+// Management System — official company form PDF generator.
 // Replicates the original paper documents (header block with
 // logo + doc-control table, navy company strip, section
 // banners, fill-in boxes, checkbox groups, signature lines).
@@ -77,7 +77,7 @@ function drawHeader(doc: PDFKit.PDFDocument) {
     /* logo optional */
   }
   doc.font("Helvetica-Bold").fontSize(6.5).fillColor(NAVY);
-  doc.text("BAYWASH GROUP", M, y0 + 56, { width: logoW, align: "center" });
+  doc.text("MANAGEMENT SYSTEM", M, y0 + 56, { width: logoW, align: "center" });
 
   // center title cell
   const midX = M + logoW;
@@ -522,7 +522,7 @@ export async function generateFormPdf(template: FormTemplate, data: FormData): P
   }
   doc.font("Helvetica-Oblique").fontSize(7).fillColor("#6a7a99");
   doc.text(
-    `Digitally filled via BAYWASH Group Manager Dashboard on ${new Date().toLocaleDateString("en-GB", { day: "2-digit", month: "2-digit", year: "numeric" })}. Print, sign and send to the client or employee.`,
+    `Digitally filled via Management System on ${new Date().toLocaleDateString("en-GB", { day: "2-digit", month: "2-digit", year: "numeric" })}. Print, sign and send to the client or employee.`,
     M, doc.y + 6, { width: CONTENT_W }
   );
 

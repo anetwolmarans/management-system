@@ -1,12 +1,12 @@
-/* BAYWASH Group — service worker
+/* Management System — service worker
  * Strategy (dev-safe, no stale UI):
  *  - Navigations: network-first → runtime cache → /offline.html
  *  - Same-origin static assets: network-first → runtime cache
  *  - /api/*: network only (data must come from the server)
  */
 const VERSION = "v3";
-const RUNTIME_CACHE = `bw-runtime-${VERSION}`;
-const PRECACHE = `bw-precache-${VERSION}`;
+const RUNTIME_CACHE = `ms-runtime-${VERSION}`;
+const PRECACHE = `ms-precache-${VERSION}`;
 
 const PRECACHE_URLS = [
   "/offline.html",

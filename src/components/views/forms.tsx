@@ -1,6 +1,6 @@
 "use client";
 
-// Company Forms — official BAYWASH documents (fill in digitally, export as PDF).
+// Company Forms — official company documents (fill in digitally, export as PDF).
 // Templates live in src/lib/forms.ts and mirror the original paper forms doc-for-doc.
 
 import { useEffect, useState, useCallback, useMemo } from "react";
@@ -74,11 +74,11 @@ const TEMPLATE_ICONS: Record<string, React.ComponentType<{ className?: string }>
 };
 
 const TEMPLATE_NOTES: Record<string, string> = {
-  "incident-report": "Damage or incident involving a customer vehicle — BAYWASH CARWASH",
-  "accident-report": "Company vehicle accident report for insurance — BAYWASH GROUP",
-  "customer-complaint": "Client complaint intake & resolution record — BAYWASH GROUP",
-  "customer-notification": "Formal notification to a client — BAYWASH CLEANING",
-  "leave-application": "Multi-type leave application with payments — BAYWASH CLEANING",
+  "incident-report": "Damage or incident involving a customer vehicle — MANAGEMENT SYSTEM · CAR WASH",
+  "accident-report": "Company vehicle accident report for insurance — MANAGEMENT SYSTEM",
+  "customer-complaint": "Client complaint intake & resolution record — MANAGEMENT SYSTEM",
+  "customer-notification": "Formal notification to a client — MANAGEMENT SYSTEM · CLEANING",
+  "leave-application": "Multi-type leave application with payments — MANAGEMENT SYSTEM · CLEANING",
 };
 
 export function FormsView() {
@@ -166,7 +166,7 @@ export function FormsView() {
     <div className="space-y-5">
       <SectionHeader
         title="Company Forms"
-        description="Official BAYWASH documents — fill them in digitally and download a PDF to send to a client or employee."
+        description="Official company documents — fill them in digitally and download a PDF to send to a client or employee."
         actions={
           <Button onClick={() => setPickerOpen(true)} className="rounded-full gap-2">
             <Plus className="h-4 w-4" /> New form
@@ -301,7 +301,7 @@ export function FormsView() {
               <FileStack className="h-5 w-5 text-primary" /> Choose a form to fill in
             </DialogTitle>
             <DialogDescription>
-              All five official BAYWASH documents. Pick one — you can download it as a PDF once filled.
+              All five official company documents. Pick one — you can download it as a PDF once filled.
             </DialogDescription>
           </DialogHeader>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 py-2">

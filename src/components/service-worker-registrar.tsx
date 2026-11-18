@@ -3,7 +3,7 @@
 import { useEffect } from "react";
 
 /**
- * Registers the BAYWASH service worker so the app keeps its shell
+ * Registers the Management System service worker so the app keeps its shell
  * (and any previously visited pages) available when the device is offline.
  */
 export function ServiceWorkerRegistrar() {

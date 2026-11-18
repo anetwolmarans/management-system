@@ -1,7 +1,7 @@
 "use client";
 
 // ============================================================
-// BAYWASH Employee App — Android-style portal for staff.
+// Employee App — Android-style self-service portal for staff.
 // Employees sign in with their employee number / email + PIN to
 // view payslips (queryable, downloadable as branded PDF), see
 // whether their leave was approved, and check personal info.
@@ -34,7 +34,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { BaywashLogo } from "@/components/baywash-logo";
+import { BrandLogo } from "@/components/brand-logo";
 import { StatusBadge, EmptyState } from "@/components/ui-bits";
 import { cn } from "@/lib/utils";
 import { fmtMoney, fmtDate, fmtDateRange } from "@/lib/format";
@@ -103,7 +103,7 @@ interface MeData {
 
 type Tab = "home" | "payslips" | "leave" | "profile";
 
-const SESSION_KEY = "bw-portal-session";
+const SESSION_KEY = "ms-portal-session";
 const MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 const LEAVE_TYPES = ["annual", "sick", "unpaid", "emergency", "maternity"];
 
@@ -243,10 +243,10 @@ function PortalLogin({ onSignedIn }: { onSignedIn: (emp: PortalEmployee) => void
           <div className="relative">
             <div className="flex items-center gap-3">
               <div className="h-14 w-14 rounded-2xl bg-white/15 backdrop-blur flex items-center justify-center border border-white/25">
-                <BaywashLogo variant="inverse" className="h-9 w-9" />
+                <BrandLogo variant="inverse" className="h-9 w-9" />
               </div>
               <div>
-                <p className="font-extrabold text-xl tracking-wide leading-none">BAYWASH</p>
+                <p className="font-extrabold text-xl tracking-wide leading-none">Management System</p>
                 <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-[#7FCBEC] mt-1">Employee App</p>
               </div>
             </div>
@@ -263,7 +263,7 @@ function PortalLogin({ onSignedIn }: { onSignedIn: (emp: PortalEmployee) => void
                 <Label htmlFor="portal-id">Employee number or email</Label>
                 <Input
                   id="portal-id"
-                  placeholder="e.g. BW-1002 or name@baywashgroup.com"
+                  placeholder="e.g. MS-1002 or name@managementsystem.com"
                   value={identifier}
                   onChange={(e) => setIdentifier(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && signIn()}
@@ -302,14 +302,14 @@ function PortalLogin({ onSignedIn }: { onSignedIn: (emp: PortalEmployee) => void
               <p className="font-bold text-foreground flex items-center gap-1.5">
                 <Smartphone className="h-3.5 w-3.5 text-[#00AEEF]" /> Try the demo
               </p>
-              <p>Marcus Reyes — <span className="font-mono font-semibold">BW-1002</span> · PIN <span className="font-mono font-semibold">1002</span></p>
+              <p>Marcus Reyes — <span className="font-mono font-semibold">MS-1002</span> · PIN <span className="font-mono font-semibold">1002</span></p>
               <p className="text-[10px]">Every employee&apos;s default PIN is the last 4 digits of their employee number. HR can reset it.</p>
               <Button
                 size="sm"
                 variant="outline"
                 className="h-7 mt-1"
                 onClick={() => {
-                  setIdentifier("BW-1002");
+                  setIdentifier("MS-1002");
                   setPin("1002");
                 }}
               >
@@ -320,7 +320,7 @@ function PortalLogin({ onSignedIn }: { onSignedIn: (emp: PortalEmployee) => void
         </div>
 
         <div className="px-5 pb-6 text-center text-[10px] text-muted-foreground">
-          BAYWASH Group · Employee self-service · Install this page as an app from your browser menu
+          Management System · Employee self-service · Install this page as an app from your browser menu
         </div>
       </div>
     </div>
@@ -333,9 +333,9 @@ function PortalLogin({ onSignedIn }: { onSignedIn: (emp: PortalEmployee) => void
 function PortalHeader({ employee, onSignOut }: { employee: PortalEmployee; onSignOut: () => void }) {
   return (
     <header className="bg-[color:var(--sidebar)] text-white px-4 py-3 flex items-center gap-3 shrink-0">
-      <BaywashLogo variant="inverse" className="h-8 w-8 shrink-0" />
+      <BrandLogo variant="inverse" className="h-8 w-8 shrink-0" />
       <div className="min-w-0 flex-1">
-        <p className="font-extrabold text-sm tracking-wide leading-none">BAYWASH <span className="text-[#00AEEF]">Employee</span></p>
+        <p className="font-extrabold text-sm tracking-wide leading-none">Management <span className="text-[#00AEEF]">System</span> · Employee</p>
         <p className="text-[10px] text-white/60 truncate mt-0.5">{employee.name} · {employee.employeeNo}</p>
       </div>
       <Button
@@ -824,7 +824,7 @@ function LeaveTab({ session, onChanged }: { session: PortalEmployee; onChanged: 
         <DialogContent className="sm:max-w-sm">
           <DialogHeader>
             <DialogTitle>Request leave</DialogTitle>
-            <DialogDescription>Your manager reviews requests in the BAYWASH manager dashboard.</DialogDescription>
+            <DialogDescription>Your manager reviews requests in the manager dashboard.</DialogDescription>
           </DialogHeader>
           <div className="space-y-3.5 py-1">
             <div className="space-y-1.5">
@@ -933,7 +933,7 @@ function ProfileTab({ session, me, onSignOut }: { session: PortalEmployee; me: M
       </Button>
 
       <p className="text-center text-[10px] text-muted-foreground pb-1">
-        BAYWASH Group · Employee App v1.0 · Data shown is from the BAYWASH manager dashboard
+        Management System · Employee App v1.0 · Data shown is from the manager dashboard
       </p>
     </div>
   );

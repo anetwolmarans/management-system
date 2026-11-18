@@ -570,7 +570,7 @@ function ReportDialog({
         {/* Report metadata */}
         <div className="grid grid-cols-2 gap-3">
           <div className="space-y-1.5 col-span-2"><Label>Report title *</Label><Input value={title} onChange={(e) => setTitle(e.target.value)} /></div>
-          <div className="space-y-1.5"><Label>Company *</Label><Input value={company} onChange={(e) => setCompany(e.target.value)} placeholder="BAYWASH CLEANING" /></div>
+          <div className="space-y-1.5"><Label>Company *</Label><Input value={company} onChange={(e) => setCompany(e.target.value)} placeholder="MANAGEMENT SYSTEM · CLEANING" /></div>
           <div className="space-y-1.5"><Label>Report date *</Label><Input type="date" value={reportDate} onChange={(e) => setReportDate(e.target.value)} /></div>
           <div className="space-y-1.5"><Label>Frequency</Label><Select value={frequency} onValueChange={setFrequency}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent><SelectItem value="DAILY">Daily</SelectItem><SelectItem value="WEEKLY">Weekly</SelectItem><SelectItem value="MONTHLY">Monthly</SelectItem></SelectContent></Select></div>
           <div className="space-y-1.5"><Label>Status</Label><Select value={status} onValueChange={setStatus}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent><SelectItem value="draft">Draft</SelectItem><SelectItem value="submitted">Submitted</SelectItem><SelectItem value="reviewed">Reviewed</SelectItem></SelectContent></Select></div>

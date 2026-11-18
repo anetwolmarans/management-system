@@ -1,4 +1,4 @@
-// Shared API helpers for BAYWASH Group manager workspace routes.
+// Shared API helpers for Management System workspace routes.
 import { NextResponse } from "next/server";
 
 export const json = (data: unknown, status = 200) =>
