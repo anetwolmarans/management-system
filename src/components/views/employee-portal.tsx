@@ -25,6 +25,7 @@ import {
   Smartphone,
   ShieldCheck,
   ShieldAlert,
+  Clock,
   FileText,
 } from "lucide-react";
 import { toast } from "sonner";
@@ -103,6 +104,28 @@ interface WarningRow {
   acknowledgedAt: string | null;
 }
 
+interface LoanRow {
+  id: string;
+  principal: number;
+  interestRate: number;
+  termMonths: number;
+  monthlyPayment: number;
+  balance: number;
+  status: string;
+  issuedAt: string;
+}
+
+interface TimesheetRow {
+  id: string;
+  date: string;
+  clockIn: string;
+  clockOut: string | null;
+  breakMin: number;
+  hours: number;
+  status: string;
+  notes: string | null;
+}
+
 interface MeData {
   employee: PortalEmployee;
   latestPayslip: PortalSlip | null;
@@ -120,7 +143,7 @@ interface MeData {
   recentLeave: LeaveRow[];
 }
 
-type Tab = "home" | "payslips" | "leave" | "warnings" | "profile";
+type Tab = "home" | "payslips" | "leave" | "warnings" | "timesheets" | "loans" | "profile";
 
 const SESSION_KEY = "ms-portal-session";
 const MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
@@ -246,6 +269,8 @@ export function EmployeePortal() {
               {tab === "payslips" && <PayslipsTab token={session.token} />}
               {tab === "leave" && <LeaveTab token={session.token} onChanged={() => session && loadMe(session.token)} />}
               {tab === "warnings" && <WarningsTab token={session.token} onChanged={() => session && loadMe(session.token)} />}
+              {tab === "timesheets" && <TimesheetsTab token={session.token} />}
+              {tab === "loans" && <LoansTab token={session.token} />}
               {tab === "profile" && <ProfileTab employee={session.employee} me={me} onSignOut={signOut} />}
             </>
           )}
@@ -418,11 +443,13 @@ function PortalTabBar({ tab, setTab, pendingLeave, activeWarnings }: { tab: Tab;
     { id: "payslips", label: "Payslips", icon: ReceiptText },
     { id: "leave", label: "Leave", icon: CalendarDays, badge: pendingLeave },
     { id: "warnings", label: "Warnings", icon: ShieldAlert, badge: activeWarnings },
+    { id: "timesheets", label: "Hours", icon: Clock },
+    { id: "loans", label: "Loans", icon: Wallet },
     { id: "profile", label: "Profile", icon: User },
   ];
   return (
     <nav className="absolute bottom-0 inset-x-0 z-30 bg-[color:var(--sidebar)] safe-bottom shadow-[0_-2px_10px_rgba(1,32,94,0.25)]" aria-label="App tabs">
-      <div className="grid grid-cols-5 px-1 pt-1.5 pb-1">
+      <div className="grid grid-cols-7 px-0.5 pt-1.5 pb-1">
         {items.map((item) => {
           const Icon = item.icon;
           const active = tab === item.id;
@@ -1054,6 +1081,174 @@ function WarningsTab({ token, onChanged }: { token: string; onChanged: () => voi
           </CardContent>
         </Card>
       ))}
+    </div>
+  );
+}
+
+function LoansTab({ token }: { token: string }) {
+  const [loans, setLoans] = useState<LoanRow[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    Promise.resolve().then(async () => {
+      setLoading(true);
+      try {
+        const r = await fetch("/api/portal/loans", { headers: { Authorization: `Bearer ${token}` } });
+        if (r.status === 401) return;
+        const d = await r.json();
+        setLoans(Array.isArray(d) ? d : []);
+      } catch {
+        toast.error("Failed to load loans");
+      } finally {
+        setLoading(false);
+      }
+    });
+  }, [token]);
+
+  const fmtMoney = (n: number) => `$${n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+
+  if (loading) {
+    return <div className="flex items-center justify-center py-16 text-muted-foreground"><Loader2 className="h-5 w-5 animate-spin mr-2" /> Loading…</div>;
+  }
+
+  if (loans.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center py-20 text-center">
+        <Wallet className="h-12 w-12 text-muted-foreground mb-3" />
+        <p className="font-semibold text-lg">No loans on record</p>
+        <p className="text-sm text-muted-foreground mt-1">You have no active or past loans.</p>
+      </div>
+    );
+  }
+
+  const active = loans.filter((l) => l.status === "active");
+  const totalBalance = active.reduce((s, l) => s + l.balance, 0);
+  const totalMonthly = active.reduce((s, l) => s + l.monthlyPayment, 0);
+
+  return (
+    <div className="space-y-3">
+      {active.length > 0 && (
+        <Card className="bg-primary/5 border-primary/20">
+          <CardContent className="p-4">
+            <p className="text-xs text-muted-foreground uppercase tracking-wide">Outstanding balance</p>
+            <p className="text-2xl font-bold text-primary">{fmtMoney(totalBalance)}</p>
+            <p className="text-xs text-muted-foreground mt-1">Monthly deductions: {fmtMoney(totalMonthly)}</p>
+          </CardContent>
+        </Card>
+      )}
+      {loans.map((l) => {
+        const paid = l.principal + (l.principal * l.interestRate * l.termMonths) / 1200 - l.balance;
+        const total = l.monthlyPayment * l.termMonths;
+        const pct = total > 0 ? Math.min(100, Math.round((paid / total) * 100)) : 0;
+        return (
+          <Card key={l.id}>
+            <CardContent className="p-4 space-y-2">
+              <div className="flex items-start justify-between gap-2">
+                <div>
+                  <p className="font-semibold">{fmtMoney(l.principal)} loan</p>
+                  <p className="text-xs text-muted-foreground">
+                    {l.termMonths} months · {l.interestRate}% interest · issued {new Date(l.issuedAt).toLocaleDateString()}
+                  </p>
+                </div>
+                <span className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded-full ${
+                  l.status === "active" ? "bg-amber-500 text-white" :
+                  l.status === "paid" ? "bg-emerald-500 text-white" : "bg-slate-400 text-white"
+                }`}>{l.status}</span>
+              </div>
+              <div className="grid grid-cols-3 gap-2 text-sm">
+                <div><p className="text-xs text-muted-foreground">Monthly</p><p className="font-medium">{fmtMoney(l.monthlyPayment)}</p></div>
+                <div><p className="text-xs text-muted-foreground">Balance</p><p className="font-medium">{fmtMoney(l.balance)}</p></div>
+                <div><p className="text-xs text-muted-foreground">Paid</p><p className="font-medium">{pct}%</p></div>
+              </div>
+              {l.status === "active" && (
+                <div className="h-2 rounded-full bg-muted overflow-hidden">
+                  <div className="h-full bg-primary rounded-full transition-all" style={{ width: `${pct}%` }} />
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        );
+      })}
+    </div>
+  );
+}
+
+function TimesheetsTab({ token }: { token: string }) {
+  const [timesheets, setTimesheets] = useState<TimesheetRow[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    Promise.resolve().then(async () => {
+      setLoading(true);
+      try {
+        const r = await fetch("/api/portal/timesheets", { headers: { Authorization: `Bearer ${token}` } });
+        if (r.status === 401) return;
+        const d = await r.json();
+        setTimesheets(Array.isArray(d) ? d : []);
+      } catch {
+        toast.error("Failed to load timesheets");
+      } finally {
+        setLoading(false);
+      }
+    });
+  }, [token]);
+
+  if (loading) {
+    return <div className="flex items-center justify-center py-16 text-muted-foreground"><Loader2 className="h-5 w-5 animate-spin mr-2" /> Loading…</div>;
+  }
+
+  if (timesheets.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center py-20 text-center">
+        <Clock className="h-12 w-12 text-muted-foreground mb-3" />
+        <p className="font-semibold text-lg">No timesheets yet</p>
+        <p className="text-sm text-muted-foreground mt-1">Your logged hours will appear here.</p>
+      </div>
+    );
+  }
+
+  const totalHours = timesheets.reduce((s, t) => s + t.hours, 0);
+  const fmtTime = (s: string | null) => s ? new Date(s).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) : "—";
+
+  return (
+    <div className="space-y-3">
+      <Card className="bg-primary/5 border-primary/20">
+        <CardContent className="p-4 flex items-center justify-between">
+          <div>
+            <p className="text-xs text-muted-foreground uppercase tracking-wide">Total hours (recent)</p>
+            <p className="text-2xl font-bold text-primary">{totalHours.toFixed(1)}h</p>
+          </div>
+          <Clock className="h-8 w-8 text-primary/40" />
+        </CardContent>
+      </Card>
+      {timesheets.map((t) => {
+        const d = new Date(t.date);
+        return (
+          <Card key={t.id}>
+            <CardContent className="p-3 flex items-center justify-between gap-3">
+              <div className="flex items-center gap-3 min-w-0">
+                <div className="flex flex-col items-center justify-center w-12 shrink-0">
+                  <span className="text-[10px] uppercase text-muted-foreground">{d.toLocaleDateString([], { month: "short" })}</span>
+                  <span className="text-lg font-bold leading-none">{d.getDate()}</span>
+                </div>
+                <div className="min-w-0">
+                  <p className="text-sm font-medium whitespace-nowrap">
+                    {fmtTime(t.clockIn)} → {fmtTime(t.clockOut)}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    {t.hours.toFixed(1)}h worked · {t.breakMin}min break
+                    {t.notes && ` · ${t.notes}`}
+                  </p>
+                </div>
+              </div>
+              <span className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded-full shrink-0 ${
+                t.status === "approved" ? "bg-emerald-500 text-white" :
+                t.status === "rejected" ? "bg-rose-500 text-white" : "bg-slate-400 text-white"
+              }`}>{t.status}</span>
+            </CardContent>
+          </Card>
+        );
+      })}
     </div>
   );
 }

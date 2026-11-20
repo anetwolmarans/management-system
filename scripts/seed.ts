@@ -1,5 +1,6 @@
 // Seed script — populate the database with realistic sample data for demo.
 import { db } from "../src/lib/db";
+import { hashPin } from "../src/lib/pin-hash";
 
 async function main() {
   // Wipe existing data so re-seeding is idempotent.
@@ -52,7 +53,7 @@ async function main() {
         status: i === 11 ? "on-leave" : "active",
         avatar: null,
         // Default portal PIN = last 4 digits of the employee number (e.g. MS-1002 → 1002)
-        pin: String(1001 + i).slice(-4),
+        pin: hashPin(String(1001 + i).slice(-4)),
       },
     });
     createdEmployees.push(emp);
