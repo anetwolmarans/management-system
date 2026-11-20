@@ -36,6 +36,7 @@ model Employee {
   reports        WeeklyReport[]       @relation("ReportAuthor")
   payslips       Payslip[]
   portalSessions PortalSession[]
+  warnings       Warning[]
 }
 
 model Timesheet {
@@ -310,6 +311,25 @@ model PortalSession {
   employeeId String
   expiresAt  DateTime
   createdAt  DateTime @default(now())
+
+  employee Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+
+  @@index([employeeId])
+}
+
+// Disciplinary / performance warnings issued to an employee by a manager.
+// Visible to the employee on their portal (read-only, with acknowledge action).
+model Warning {
+  id             String    @id @default(cuid())
+  employeeId     String
+  type           String    // verbal | written | final | performance | safety
+  subject        String
+  details        String
+  issuedBy       String    // manager name or email
+  issuedAt       DateTime
+  status         String    @default("active") // active | acknowledged | expired | withdrawn
+  acknowledgedAt DateTime?
+  createdAt      DateTime  @default(now())
 
   employee Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
 

@@ -24,6 +24,7 @@ import {
   Plus,
   Smartphone,
   ShieldCheck,
+  ShieldAlert,
   FileText,
 } from "lucide-react";
 import { toast } from "sonner";
@@ -91,6 +92,17 @@ interface LeaveRow {
   status: string;
 }
 
+interface WarningRow {
+  id: string;
+  type: string;
+  subject: string;
+  details: string;
+  issuedBy: string;
+  issuedAt: string;
+  status: string;
+  acknowledgedAt: string | null;
+}
+
 interface MeData {
   employee: PortalEmployee;
   latestPayslip: PortalSlip | null;
@@ -102,12 +114,13 @@ interface MeData {
     ytdNet: number;
     activeLoan: { balance: number; monthlyPayment: number } | null;
     annualAllowance: number;
+    activeWarnings: number;
   };
   currentLeave: LeaveRow | null;
   recentLeave: LeaveRow[];
 }
 
-type Tab = "home" | "payslips" | "leave" | "profile";
+type Tab = "home" | "payslips" | "leave" | "warnings" | "profile";
 
 const SESSION_KEY = "ms-portal-session";
 const MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
@@ -232,12 +245,13 @@ export function EmployeePortal() {
               {tab === "home" && <HomeTab me={me} employee={session.employee} token={session.token} onGoTab={setTab} />}
               {tab === "payslips" && <PayslipsTab token={session.token} />}
               {tab === "leave" && <LeaveTab token={session.token} onChanged={() => session && loadMe(session.token)} />}
+              {tab === "warnings" && <WarningsTab token={session.token} onChanged={() => session && loadMe(session.token)} />}
               {tab === "profile" && <ProfileTab employee={session.employee} me={me} onSignOut={signOut} />}
             </>
           )}
         </main>
 
-        <PortalTabBar tab={tab} setTab={setTab} pendingLeave={me?.stats.pendingLeave ?? 0} />
+        <PortalTabBar tab={tab} setTab={setTab} pendingLeave={me?.stats.pendingLeave ?? 0} activeWarnings={me?.stats.activeWarnings ?? 0} />
       </div>
     </div>
   );
@@ -398,16 +412,17 @@ function PortalHeader({ employee, onSignOut }: { employee: PortalEmployee; onSig
   );
 }
 
-function PortalTabBar({ tab, setTab, pendingLeave }: { tab: Tab; setTab: (t: Tab) => void; pendingLeave: number }) {
+function PortalTabBar({ tab, setTab, pendingLeave, activeWarnings }: { tab: Tab; setTab: (t: Tab) => void; pendingLeave: number; activeWarnings: number }) {
   const items: Array<{ id: Tab; label: string; icon: typeof Home; badge?: number }> = [
     { id: "home", label: "Home", icon: Home },
     { id: "payslips", label: "Payslips", icon: ReceiptText },
     { id: "leave", label: "Leave", icon: CalendarDays, badge: pendingLeave },
+    { id: "warnings", label: "Warnings", icon: ShieldAlert, badge: activeWarnings },
     { id: "profile", label: "Profile", icon: User },
   ];
   return (
     <nav className="absolute bottom-0 inset-x-0 z-30 bg-[color:var(--sidebar)] safe-bottom shadow-[0_-2px_10px_rgba(1,32,94,0.25)]" aria-label="App tabs">
-      <div className="grid grid-cols-4 px-1 pt-1.5 pb-1">
+      <div className="grid grid-cols-5 px-1 pt-1.5 pb-1">
         {items.map((item) => {
           const Icon = item.icon;
           const active = tab === item.id;
@@ -920,6 +935,129 @@ function LeaveTab({ token, onChanged }: { token: string; onChanged: () => void }
 // ============================================================
 // Profile tab
 // ============================================================
+function WarningsTab({ token, onChanged }: { token: string; onChanged: () => void }) {
+  const [warnings, setWarnings] = useState<WarningRow[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [busy, setBusy] = useState<string | null>(null);
+
+  const load = useCallback(async (token: string) => {
+    setLoading(true);
+    try {
+      const r = await fetch("/api/portal/warnings", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (r.status === 401) return;
+      const d = await r.json();
+      setWarnings(Array.isArray(d) ? d : []);
+    } catch {
+      toast.error("Failed to load warnings");
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    Promise.resolve().then(() => load(token));
+  }, [token, load]);
+
+  const acknowledge = async (id: string) => {
+    setBusy(id);
+    try {
+      const r = await fetch("/api/portal/warnings", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ id }),
+      });
+      if (!r.ok) {
+        const d = await r.json().catch(() => ({}));
+        toast.error(d.error ?? "Could not acknowledge");
+        return;
+      }
+      toast.success("Warning acknowledged");
+      load(token);
+      onChanged();
+    } catch {
+      toast.error("Network error");
+    } finally {
+      setBusy(null);
+    }
+  };
+
+  const typeStyle = (t: string) => {
+    switch (t) {
+      case "verbal": return "bg-blue-500/15 text-blue-700 dark:text-blue-300";
+      case "written": return "bg-amber-500/15 text-amber-700 dark:text-amber-300";
+      case "final": return "bg-rose-500/15 text-rose-700 dark:text-rose-300";
+      case "performance": return "bg-violet-500/15 text-violet-700 dark:text-violet-300";
+      case "safety": return "bg-orange-500/15 text-orange-700 dark:text-orange-300";
+      default: return "bg-slate-500/15 text-slate-700 dark:text-slate-300";
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-16 text-muted-foreground">
+        <Loader2 className="h-5 w-5 animate-spin mr-2" /> Loading…
+      </div>
+    );
+  }
+
+  if (warnings.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center py-20 text-center">
+        <ShieldCheck className="h-12 w-12 text-emerald-500 mb-3" />
+        <p className="font-semibold text-lg">No warnings on file</p>
+        <p className="text-sm text-muted-foreground mt-1">You have a clean record.</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-3">
+      <p className="text-xs text-muted-foreground px-1">
+        Warnings issued to you by management. Acknowledge each one to confirm you've read it.
+      </p>
+      {warnings.map((w) => (
+        <Card key={w.id} className={w.status === "active" ? "border-amber-400/60" : ""}>
+          <CardContent className="p-4 space-y-2">
+            <div className="flex items-start justify-between gap-2">
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className={`inline-block px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wide capitalize ${typeStyle(w.type)}`}>
+                  {w.type}
+                </span>
+                <h3 className="font-semibold text-sm leading-tight">{w.subject}</h3>
+              </div>
+              <span className={`text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full ${
+                w.status === "active" ? "bg-amber-500 text-white" :
+                w.status === "acknowledged" ? "bg-emerald-500 text-white" :
+                "bg-slate-400 text-white"
+              }`}>
+                {w.status}
+              </span>
+            </div>
+            <p className="text-sm text-muted-foreground whitespace-pre-wrap">{w.details}</p>
+            <div className="flex items-center justify-between gap-2 pt-1 text-xs text-muted-foreground">
+              <span>Issued by {w.issuedBy} · {new Date(w.issuedAt).toLocaleDateString()}</span>
+              {w.acknowledgedAt && <span>Acknowledged {new Date(w.acknowledgedAt).toLocaleDateString()}</span>}
+            </div>
+            {w.status === "active" && (
+              <Button
+                size="sm"
+                className="w-full mt-2"
+                disabled={busy === w.id}
+                onClick={() => acknowledge(w.id)}
+              >
+                {busy === w.id ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : <ShieldCheck className="h-4 w-4 mr-1" />}
+                I've read this — acknowledge
+              </Button>
+            )}
+          </CardContent>
+        </Card>
+      ))}
+    </div>
+  );
+}
+
 function ProfileTab({ employee, me, onSignOut }: { employee: PortalEmployee; me: MeData | null; onSignOut: () => void }) {
   return (
     <div className="space-y-4">

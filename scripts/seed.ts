@@ -58,6 +58,35 @@ async function main() {
     createdEmployees.push(emp);
   }
 
+  // ---------- Warnings (demo for Marcus Reyes, MS-1002) ----------
+  await db.warning.deleteMany();
+  const marcus = createdEmployees.find((e) => e.employeeNo === "MS-1002") ?? createdEmployees[1];
+  if (marcus) {
+    await db.warning.create({
+      data: {
+        employeeId: marcus.id,
+        type: "written",
+        subject: "Repeated lateness",
+        details: "Three instances of arriving late for the morning shift in the past two weeks (Nov 4, 6 and 11). Prior verbal reminder was given on Oct 28. Improvement expected immediately.",
+        issuedBy: "Operations Manager",
+        issuedAt: new Date(Date.now() - 7 * 86400000),
+        status: "active",
+      },
+    });
+    await db.warning.create({
+      data: {
+        employeeId: marcus.id,
+        type: "verbal",
+        subject: "Vehicle inspection overdue",
+        details: "Weekly vehicle inspection for assigned van MS-101-A was not submitted on schedule. Verbal warning issued; please ensure inspections are completed every Friday.",
+        issuedBy: "Fleet Controller",
+        issuedAt: new Date(Date.now() - 30 * 86400000),
+        status: "acknowledged",
+        acknowledgedAt: new Date(Date.now() - 28 * 86400000),
+      },
+    });
+  }
+
   // ---------- Timesheets (last 7 days) ----------
   const today = new Date();
   for (let d = 6; d >= 0; d--) {

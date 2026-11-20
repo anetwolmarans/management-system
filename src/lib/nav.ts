@@ -12,6 +12,7 @@ import {
   FileBarChart,
   Factory,
   Table2,
+  ShieldAlert,
   type LucideIcon,
 } from "lucide-react";
 import type { SectionId } from "@/lib/store";
@@ -30,6 +31,7 @@ export const NAV_ITEMS: NavItem[] = [
   { id: "timesheets", label: "Timesheets", short: "Hours", icon: Clock, description: "Clock in/out & hours" },
   { id: "leave", label: "Leave", short: "Leave", icon: CalendarDays, description: "Requests & approvals" },
   { id: "complaints", label: "Complaints", short: "Cases", icon: MessageSquareWarning, description: "Issues & resolutions" },
+  { id: "warnings", label: "Warnings", short: "Warnings", icon: ShieldAlert, description: "Disciplinary & performance warnings" },
   { id: "loans", label: "Loans", short: "Loans", icon: Banknote, description: "Advances & installments" },
   { id: "payroll", label: "Payroll", short: "Payroll", icon: ReceiptText, description: "Monthly payslips — generate, issue & download PDF" },
   { id: "forms", label: "Company Forms", short: "Forms", icon: FileStack, description: "Official company documents — fill in & export PDF" },

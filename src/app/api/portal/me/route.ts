@@ -17,7 +17,7 @@ export async function GET(req: Request) {
   });
   if (!employee) return err("Employee not found", 404);
 
-  const [latestPayslip, leaves, payslipCount, ytdSlips] = await Promise.all([
+  const [latestPayslip, leaves, payslipCount, ytdSlips, activeWarnings] = await Promise.all([
     db.payslip.findFirst({
       where: { employeeId },
       orderBy: [{ year: "desc" }, { month: "desc" }],
@@ -29,6 +29,7 @@ export async function GET(req: Request) {
     }),
     db.payslip.count({ where: { employeeId } }),
     db.payslip.findMany({ where: { employeeId, year: new Date().getFullYear() } }),
+    db.warning.count({ where: { employeeId, status: "active" } }),
   ]);
 
   const pendingLeave = leaves.filter((l) => l.status === "pending").length;
@@ -63,6 +64,7 @@ export async function GET(req: Request) {
       ytdNet: ytdSlips.reduce((a, s) => a + s.net, 0),
       activeLoan: employee.loans.find((l) => l.status === "active") ?? null,
       annualAllowance: 21,
+      activeWarnings,
     },
     currentLeave,
     recentLeave: leaves.slice(0, 4),

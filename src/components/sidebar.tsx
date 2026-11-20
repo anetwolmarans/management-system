@@ -65,21 +65,22 @@ export function Sidebar() {
         })}
       </nav>
 
-      {/* Employee app shortcut */}
+      {/* Employee app shortcut — opens the standalone /portal route */}
       <div className="px-2.5 pb-1 shrink-0">
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => setActiveSection("employee-portal")}
+        <a
+          href="/portal"
+          target="_blank"
+          rel="noopener noreferrer"
           title={collapsed ? "Open Employee App" : undefined}
           className={cn(
-            "w-full justify-center gap-2 text-[#00AEEF] hover:bg-sidebar-accent hover:text-[#00AEEF] rounded-full font-semibold",
-            !collapsed && "justify-start px-3",
+            "flex items-center gap-2 text-[#00AEEF] hover:bg-sidebar-accent hover:text-[#00AEEF] rounded-full font-semibold transition-colors",
+            "h-8 text-sm",
+            collapsed ? "w-8 justify-center" : "px-3 justify-start",
           )}
         >
           <Smartphone className="h-4 w-4 shrink-0" />
           {!collapsed && <span>Employee App</span>}
-        </Button>
+        </a>
       </div>
 
       {/* User card */}

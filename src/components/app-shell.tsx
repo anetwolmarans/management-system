@@ -11,12 +11,12 @@ import { LeaveView } from "@/components/views/leave";
 import { ComplaintsView } from "@/components/views/complaints";
 import { LoansView } from "@/components/views/loans";
 import { PayrollView } from "@/components/views/payroll";
-import { EmployeePortal } from "@/components/views/employee-portal";
 import { FormsView } from "@/components/views/forms";
 import { FleetView } from "@/components/views/fleet";
 import { FactoryReportsView } from "@/components/views/factory-reports";
 import { ReportsView } from "@/components/views/reports";
 import { SheetsView } from "@/components/views/sheets";
+import { WarningsView } from "@/components/views/warnings";
 import { NAV_ITEMS } from "@/lib/nav";
 import { cn } from "@/lib/utils";
 import { useEffect } from "react";
@@ -25,18 +25,17 @@ export function AppShell() {
   const activeSection = useAppStore((s) => s.activeSection);
   const setActiveSection = useAppStore((s) => s.setActiveSection);
 
-  // Sync section from URL query param on mount (for PWA shortcuts).
-  // ?app=employee opens the dedicated employee self-service app.
-  // Bare "/" always resets to the manager suite.
+  // Employee portal now lives at its own /portal route — the AppShell no
+  // longer hosts it. The sidebar links there directly. Legacy ?app=employee
+  // is redirected to /portal so old PWA shortcuts keep working.
   useEffect(() => {
     if (typeof window === "undefined") return;
     const params = new URLSearchParams(window.location.search);
-    const app = params.get("app");
-    if (app === "employee") {
-      setActiveSection("employee-portal" as never);
+    if (params.get("app") === "employee") {
+      window.location.replace("/portal");
       return;
     }
-    if (!params.get("section") && useAppStore.getState().activeSection === ("employee-portal" as never)) {
+    if (useAppStore.getState().activeSection === ("employee-portal" as never)) {
       setActiveSection("dashboard");
       return;
     }
@@ -45,11 +44,6 @@ export function AppShell() {
       setActiveSection(section as never);
     }
   }, [setActiveSection]);
-
-  // Employee app runs standalone — full-screen, no manager chrome.
-  if (activeSection === "employee-portal") {
-    return <EmployeePortal />;
-  }
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
@@ -67,6 +61,7 @@ export function AppShell() {
               {activeSection === "timesheets" && <TimesheetsView />}
               {activeSection === "leave" && <LeaveView />}
               {activeSection === "complaints" && <ComplaintsView />}
+              {activeSection === "warnings" && <WarningsView />}
               {activeSection === "loans" && <LoansView />}
               {activeSection === "payroll" && <PayrollView />}
               {activeSection === "forms" && <FormsView />}

@@ -8,6 +8,7 @@ export type SectionId =
   | "timesheets"
   | "leave"
   | "complaints"
+  | "warnings"
   | "loans"
   | "payroll"
   | "forms"
