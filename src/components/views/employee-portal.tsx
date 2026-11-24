@@ -294,7 +294,7 @@ function PortalLogin({ onSignedIn }: { onSignedIn: (s: PortalSession) => void })
   const signIn = async () => {
     setError("");
     if (!identifier.trim() || !pin.trim()) {
-      setError("Enter your employee number / email and PIN.");
+      setError("Enter your employee number, phone, or email and your PIN.");
       return;
     }
     setBusy(true);
@@ -346,15 +346,17 @@ function PortalLogin({ onSignedIn }: { onSignedIn: (s: PortalSession) => void })
           <Card className="shadow-lg border-border/70">
             <CardContent className="p-5 space-y-4">
               <div className="space-y-1.5">
-                <Label htmlFor="portal-id">Employee number or email</Label>
+                <Label htmlFor="portal-id">Employee number, phone, or email</Label>
                 <Input
                   id="portal-id"
-                  placeholder="e.g. MS-1002 or name@managementsystem.com"
+                  placeholder="e.g. 1002"
                   value={identifier}
                   onChange={(e) => setIdentifier(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && signIn()}
-                  autoCapitalize="characters"
+                  autoCapitalize="none"
+                  autoCorrect="off"
                 />
+                <p className="text-[11px] text-muted-foreground">Just your number (e.g. <span className="font-semibold">1002</span>), your phone, or email.</p>
               </div>
               <div className="space-y-1.5">
                 <Label htmlFor="portal-pin">PIN</Label>
@@ -388,14 +390,14 @@ function PortalLogin({ onSignedIn }: { onSignedIn: (s: PortalSession) => void })
               <p className="font-bold text-foreground flex items-center gap-1.5">
                 <Smartphone className="h-3.5 w-3.5 text-[#00AEEF]" /> Try the demo
               </p>
-              <p>Marcus Reyes — <span className="font-mono font-semibold">MS-1002</span> · PIN <span className="font-mono font-semibold">1002</span></p>
-              <p className="text-[10px]">Every employee&apos;s default PIN is the last 4 digits of their employee number. HR can reset it.</p>
+              <p>Marcus Reyes — number <span className="font-mono font-semibold">1002</span> · PIN <span className="font-mono font-semibold">1002</span></p>
+              <p className="text-[10px]">Just type your number (e.g. 1002) and your PIN. You can also use your phone or email.</p>
               <Button
                 size="sm"
                 variant="outline"
                 className="h-7 mt-1"
                 onClick={() => {
-                  setIdentifier("MS-1002");
+                  setIdentifier("1002");
                   setPin("1002");
                 }}
               >
