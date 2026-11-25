@@ -55,6 +55,9 @@ async function main() {
         // Admin-assigned portal PIN (hashed). Marcus (MS-1002) gets "1002"
         // for the demo; all others default to "0000" — admin sets real PINs.
         pin: hashPin(i === 1 ? "1002" : "0000"),
+        // Roles: Marcus (index 1) is owner, Sarah (index 0) is manager,
+        // everyone else is a regular employee.
+        role: i === 1 ? "owner" : i === 0 ? "manager" : "employee",
       },
     });
     createdEmployees.push(emp);
@@ -162,6 +165,7 @@ async function main() {
     await db.complaint.create({
       data: {
         employeeId: emp.id,
+        type: "complaint",
         title: t.title,
         description: t.description,
         category: t.category,
@@ -170,6 +174,34 @@ async function main() {
         resolution: isResolved ? "Issue addressed — corrective action taken and documented in HR file." : null,
         createdAt: created,
         resolvedAt: isResolved ? new Date(created.getTime() + 86400000 * 2) : null,
+      },
+    });
+  }
+
+  // ---------- Compliments ----------
+  const complimentTemplates = [
+    { title: "Excellent customer service", category: "service", description: "Went above and beyond to help a difficult client — received a personal thank-you email from the customer." },
+    { title: "Outstanding safety initiative", category: "safety", description: "Proactively identified and reported a hydraulic leak before it became a hazard. Prevented a potential workplace injury." },
+    { title: "Great team leadership during peak", category: "service", description: "Stepped up to coordinate the night shift during the busy season, keeping morale high and meeting all targets." },
+    { title: "Consistent quality work", category: "quality", description: "Zero defects reported on all inspections for three consecutive months. Sets the standard for the team." },
+  ];
+  for (let i = 0; i < complimentTemplates.length; i++) {
+    const t = complimentTemplates[i];
+    const emp = createdEmployees[(i + 2) % createdEmployees.length];
+    const created = new Date(today);
+    created.setDate(today.getDate() - (i + 1) * 3);
+    await db.complaint.create({
+      data: {
+        employeeId: emp.id,
+        type: "compliment",
+        title: t.title,
+        description: t.description,
+        category: t.category,
+        priority: "low",
+        status: i < 2 ? "open" : "resolved",
+        resolution: i >= 2 ? "Recognized in team meeting and added to personnel file." : null,
+        createdAt: created,
+        resolvedAt: i >= 2 ? new Date(created.getTime() + 86400000) : null,
       },
     });
   }

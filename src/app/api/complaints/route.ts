@@ -6,11 +6,13 @@ export async function GET(req: Request) {
   const status = searchParams.get("status") ?? "";
   const priority = searchParams.get("priority") ?? "";
   const category = searchParams.get("category") ?? "";
+  const type = searchParams.get("type") ?? "";
 
   const where: Record<string, unknown> = {};
   if (status) where.status = status;
   if (priority) where.priority = priority;
   if (category) where.category = category;
+  if (type) where.type = type;
 
   const complaints = await db.complaint.findMany({
     where,
@@ -31,6 +33,7 @@ export async function POST(req: Request) {
   const complaint = await db.complaint.create({
     data: {
       employeeId: body.employeeId,
+      type: (body.type as string) ?? "complaint",
       title: body.title,
       description: (body.description as string) ?? "",
       category: (body.category as string) ?? "other",

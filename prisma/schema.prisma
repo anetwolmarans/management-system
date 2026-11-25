@@ -23,6 +23,7 @@ model Employee {
   status      String   @default("active") // active | on-leave | suspended | terminated
   avatar      String?
   pin         String   @default("0000") // employee-app portal access code
+  role        String   @default("employee") // employee | manager | owner
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
@@ -74,9 +75,10 @@ model LeaveRequest {
 model Complaint {
   id          String    @id @default(cuid())
   employeeId  String
+  type        String    @default("complaint") // complaint | compliment
   title       String
   description String
-  category    String    // harassment | safety | payment | workload | equipment | other
+  category    String    // harassment | safety | payment | workload | equipment | service | quality | other
   priority    String    @default("medium") // low | medium | high | critical
   status      String    @default("open") // open | investigating | resolved | dismissed
   resolution  String?

@@ -5,15 +5,22 @@ import { useAppStore } from "@/lib/store";
 import { NAV_ITEMS } from "@/lib/nav";
 import { cn } from "@/lib/utils";
 import { BrandLogo } from "@/components/brand-logo";
-import { ChevronsLeft, Smartphone } from "lucide-react";
+import { ChevronsLeft, Smartphone, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
-export function Sidebar() {
+export function Sidebar({ role, managerName, managerRole, onSignOut }: {
+  role?: string;
+  managerName?: string;
+  managerRole?: string;
+  onSignOut?: () => void;
+}) {
   const activeSection = useAppStore((s) => s.activeSection);
   const setActiveSection = useAppStore((s) => s.setActiveSection);
   const collapsed = useAppStore((s) => s.sidebarCollapsed);
   const toggle = useAppStore((s) => s.toggleSidebar);
+
+  const items = NAV_ITEMS.filter((n) => !n.roles || (role && n.roles.includes(role)));
 
   return (
     <aside
@@ -39,7 +46,7 @@ export function Sidebar() {
 
       {/* Nav */}
       <nav className="flex-1 overflow-y-auto py-3 px-2.5 space-y-1 scrollbar-thin">
-        {NAV_ITEMS.map((item) => {
+        {items.map((item) => {
           const Icon = item.icon;
           const active = activeSection === item.id;
           return (
@@ -83,18 +90,27 @@ export function Sidebar() {
         </a>
       </div>
 
-      {/* User card */}
+      {/* User card — shows the signed-in manager */}
       {!collapsed && (
-        <div className="mx-2.5 mb-2 p-3 rounded-2xl bg-sidebar-accent flex items-center gap-2.5">
+        <div className="mx-2.5 mb-1 p-3 rounded-2xl bg-sidebar-accent flex items-center gap-2.5">
           <Avatar className="h-8 w-8">
             <AvatarFallback className="bg-sidebar-primary text-sidebar-primary-foreground text-[11px] font-bold">
-              SC
+              {(managerName ?? "?").split(" ").map((n) => n[0]).join("").slice(0, 2)}
             </AvatarFallback>
           </Avatar>
-          <div className="min-w-0 leading-tight">
-            <p className="text-xs font-bold truncate">Sarah Chen</p>
-            <p className="text-[10px] text-sidebar-foreground/60 truncate">Operations Manager</p>
+          <div className="min-w-0 leading-tight flex-1">
+            <p className="text-xs font-bold truncate">{managerName ?? "Manager"}</p>
+            <p className="text-[10px] text-sidebar-foreground/60 truncate capitalize">{managerRole ?? "manager"}</p>
           </div>
+          {onSignOut && (
+            <button
+              onClick={onSignOut}
+              title="Sign out"
+              className="shrink-0 text-sidebar-foreground/50 hover:text-sidebar-foreground p-1"
+            >
+              <LogOut className="h-3.5 w-3.5" />
+            </button>
+          )}
         </div>
       )}
 

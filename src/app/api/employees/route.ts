@@ -53,6 +53,7 @@ export async function POST(req: Request) {
         avatar: (body.avatar as string) ?? null,
         // Admin-assigned portal PIN — hashed before storage.
         pin: hashPin(String(body.pin ?? "0000").trim() || "0000"),
+        role: (body.role as string) ?? "employee",
       },
     });
     return json(emp, 201);

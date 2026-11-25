@@ -1,6 +1,7 @@
 // Navigation configuration — single source of truth for the sidebar + mobile nav.
 import {
   LayoutDashboard,
+  Activity,
   Users,
   Clock,
   CalendarDays,
@@ -23,10 +24,13 @@ export interface NavItem {
   short: string;
   icon: LucideIcon;
   description: string;
+  /** roles that can see this item; omit = all roles */
+  roles?: string[];
 }
 
 export const NAV_ITEMS: NavItem[] = [
   { id: "dashboard", label: "Dashboard", short: "Home", icon: LayoutDashboard, description: "KPIs & overview" },
+  { id: "operations", label: "Operations", short: "Ops", icon: Activity, description: "Owner overview: jobs, complaints, compliments, inspections, fleet", roles: ["owner"] },
   { id: "employees", label: "Employees", short: "Staff", icon: Users, description: "Directory & profiles" },
   { id: "timesheets", label: "Timesheets", short: "Hours", icon: Clock, description: "Clock in/out & hours" },
   { id: "leave", label: "Leave", short: "Leave", icon: CalendarDays, description: "Requests & approvals" },

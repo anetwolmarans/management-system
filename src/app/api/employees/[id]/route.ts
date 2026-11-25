@@ -31,6 +31,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
   if (body.pin !== undefined && String(body.pin).trim() !== "") {
     data.pin = hashPin(String(body.pin).trim());
   }
+  if (body.role !== undefined) data.role = body.role;
   try {
     const updated = await db.employee.update({ where: { id }, data });
     return json(updated);

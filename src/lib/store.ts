@@ -4,6 +4,7 @@ import { persist } from "zustand/middleware";
 
 export type SectionId =
   | "dashboard"
+  | "operations"
   | "employees"
   | "timesheets"
   | "leave"

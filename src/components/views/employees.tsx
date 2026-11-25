@@ -27,10 +27,12 @@ interface Employee {
   hireDate: string;
   salary: number;
   status: string;
+  role: string;
 }
 
 const DEPARTMENTS = ["Operations", "Sales", "Logistics", "HR", "Finance", "Engineering"];
 const STATUSES = ["active", "on-leave", "suspended", "terminated"];
+const ROLES = ["employee", "manager", "owner"];
 
 const EMPLOYEE_COLUMNS: BulkColumn[] = [
   { key: "name", label: "Name", required: true },
@@ -53,7 +55,7 @@ export function EmployeesView() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [bulkOpen, setBulkOpen] = useState(false);
   const [editing, setEditing] = useState<Employee | null>(null);
-  const [form, setForm] = useState<Partial<Employee> & { pin?: string }>({});
+  const [form, setForm] = useState<Partial<Employee> & { pin?: string; role?: string }>({});
 
   const load = useCallback(() => {
     setLoading(true);
@@ -75,7 +77,7 @@ export function EmployeesView() {
 
   const openAdd = () => {
     setEditing(null);
-    setForm({ status: "active", department: "Operations", position: "", salary: 3000, hireDate: new Date().toISOString().slice(0, 10), pin: "" });
+    setForm({ status: "active", department: "Operations", position: "", salary: 3000, hireDate: new Date().toISOString().slice(0, 10), pin: "", role: "employee" });
     setDialogOpen(true);
   };
 
@@ -85,6 +87,7 @@ export function EmployeesView() {
       ...emp,
       hireDate: new Date(emp.hireDate).toISOString().slice(0, 10),
       pin: "", // blank = unchanged on edit
+      role: emp.role ?? "employee",
     });
     setDialogOpen(true);
   };
@@ -325,6 +328,16 @@ export function EmployeesView() {
                 onChange={(e) => setForm({ ...form, pin: e.target.value })}
               />
               <p className="text-[10px] text-muted-foreground">The PIN the employee uses to sign in at /portal. Tell them in person.</p>
+            </div>
+            <div className="space-y-1.5 sm:col-span-2">
+              <Label>Role</Label>
+              <Select value={form.role ?? "employee"} onValueChange={(v) => setForm({ ...form, role: v })}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {ROLES.map((r) => <SelectItem key={r} value={r} className="capitalize">{r}</SelectItem>)}
+                </SelectContent>
+              </Select>
+              <p className="text-[10px] text-muted-foreground">Owner = full access + Operations overview. Manager = full access. Employee = portal only.</p>
             </div>
             <div className="space-y-1.5 sm:col-span-2">
               <Label>Status</Label>

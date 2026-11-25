@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState, useCallback } from "react";
 import { Sidebar } from "@/components/sidebar";
 import { MobileNav } from "@/components/mobile-nav";
 import { Topbar } from "@/components/topbar";
@@ -17,26 +18,32 @@ import { FactoryReportsView } from "@/components/views/factory-reports";
 import { ReportsView } from "@/components/views/reports";
 import { SheetsView } from "@/components/views/sheets";
 import { WarningsView } from "@/components/views/warnings";
+import { OperationsOverview } from "@/components/views/operations-overview";
+import { ManagerLogin, getManagerSession, clearManagerSession, type ManagerSession } from "@/components/manager-login";
 import { NAV_ITEMS } from "@/lib/nav";
 import { cn } from "@/lib/utils";
-import { useEffect } from "react";
+import { toast } from "sonner";
 
 export function AppShell() {
   const activeSection = useAppStore((s) => s.activeSection);
   const setActiveSection = useAppStore((s) => s.setActiveSection);
+  const [session, setSession] = useState<ManagerSession | null>(null);
+  const [checking, setChecking] = useState(true);
 
-  // Employee portal now lives at its own /portal route — the AppShell no
-  // longer hosts it. The sidebar links there directly. Legacy ?app=employee
-  // is redirected to /portal so old PWA shortcuts keep working.
+  // Restore session from localStorage on mount.
+  useEffect(() => {
+    Promise.resolve().then(() => {
+      setSession(getManagerSession());
+      setChecking(false);
+    });
+  }, []);
+
+  // Legacy ?app=employee redirects to /portal.
   useEffect(() => {
     if (typeof window === "undefined") return;
     const params = new URLSearchParams(window.location.search);
     if (params.get("app") === "employee") {
       window.location.replace("/portal");
-      return;
-    }
-    if (useAppStore.getState().activeSection === ("employee-portal" as never)) {
-      setActiveSection("dashboard");
       return;
     }
     const section = params.get("section");
@@ -45,58 +52,103 @@ export function AppShell() {
     }
   }, [setActiveSection]);
 
+  const signOut = useCallback(async () => {
+    if (session?.token) {
+      fetch("/api/auth/logout", {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${session.token}` },
+      }).catch(() => undefined);
+    }
+    clearManagerSession();
+    setSession(null);
+    setActiveSection("dashboard");
+    toast.success("Signed out");
+  }, [session, setActiveSection]);
+
+  if (checking) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-muted/30">
+        <div className="animate-pulse text-muted-foreground">Loading…</div>
+      </div>
+    );
+  }
+
+  // Auth gate — show the manager login screen if not signed in.
+  if (!session) {
+    return <ManagerLogin onSignedIn={setSession} />;
+  }
+
+  const role = session.employee.role;
+
+  // If the active section isn't available for this role, fall back to dashboard.
+  const visibleItems = NAV_ITEMS.filter((n) => !n.roles || n.roles.includes(role));
+  const activeVisible = visibleItems.some((n) => n.id === activeSection);
+  const effectiveSection = activeVisible ? activeSection : "dashboard";
+
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <div className="flex flex-1 min-h-0">
-        <Sidebar />
-        <MobileNav />
+        <Sidebar
+          role={role}
+          managerName={session.employee.name}
+          managerRole={role}
+          onSignOut={signOut}
+        />
+        <MobileNav role={role} />
 
         <div className="flex-1 flex flex-col min-w-0">
           <Topbar />
 
           <main className="flex-1 overflow-y-auto p-3 md:p-6">
             <div className={cn("mx-auto max-w-7xl")}>
-              {activeSection === "dashboard" && <DashboardView />}
-              {activeSection === "employees" && <EmployeesView />}
-              {activeSection === "timesheets" && <TimesheetsView />}
-              {activeSection === "leave" && <LeaveView />}
-              {activeSection === "complaints" && <ComplaintsView />}
-              {activeSection === "warnings" && <WarningsView />}
-              {activeSection === "loans" && <LoansView />}
-              {activeSection === "payroll" && <PayrollView />}
-              {activeSection === "forms" && <FormsView />}
-              {activeSection === "fleet" && <FleetView />}
-              {activeSection === "factory-reports" && <FactoryReportsView />}
-              {activeSection === "reports" && <ReportsView />}
-              {activeSection === "sheets" && <SheetsView />}
+              {effectiveSection === "dashboard" && <DashboardView />}
+              {effectiveSection === "operations" && role === "owner" && <OperationsOverview />}
+              {effectiveSection === "employees" && <EmployeesView />}
+              {effectiveSection === "timesheets" && <TimesheetsView />}
+              {effectiveSection === "leave" && <LeaveView />}
+              {effectiveSection === "complaints" && <ComplaintsView />}
+              {effectiveSection === "warnings" && <WarningsView />}
+              {effectiveSection === "loans" && <LoansView />}
+              {effectiveSection === "payroll" && <PayrollView />}
+              {effectiveSection === "forms" && <FormsView />}
+              {effectiveSection === "fleet" && <FleetView />}
+              {effectiveSection === "factory-reports" && <FactoryReportsView />}
+              {effectiveSection === "reports" && <ReportsView />}
+              {effectiveSection === "sheets" && <SheetsView />}
             </div>
           </main>
 
           <footer className="border-t bg-background px-4 py-3 text-xs text-muted-foreground flex flex-col sm:flex-row items-center justify-between gap-1">
-            <span>Management System — unified ops dashboard</span>
-            <span className="text-[10px]">Tip: install to home screen for app-like access (PWA)</span>
+            <span>Management System — {role === "owner" ? "Owner" : "Manager"} Suite</span>
+            <button onClick={signOut} className="text-[10px] underline hover:text-foreground">
+              Sign out ({session.employee.name})
+            </button>
           </footer>
         </div>
       </div>
 
-      {/* Mobile bottom navigation — quick switcher */}
-      <MobileBottomNav />
+      <MobileBottomNav role={role} />
     </div>
   );
 }
 
-function MobileBottomNav() {
+function MobileBottomNav({ role }: { role: string }) {
   const activeSection = useAppStore((s) => s.activeSection);
   const setActiveSection = useAppStore((s) => s.setActiveSection);
-  // Show only 5 priority items in bottom nav
-  const items = NAV_ITEMS.filter((n) =>
-    ["dashboard", "employees", "timesheets", "fleet", "factory-reports"].includes(n.id),
+  const items = NAV_ITEMS.filter(
+    (n) =>
+      (!n.roles || n.roles.includes(role)) &&
+      ["dashboard", "employees", "timesheets", "fleet", "factory-reports"].includes(n.id),
   );
+  // If operations is available (owner), swap out factory-reports for it.
+  const finalItems = role === "owner"
+    ? items.map((n) => (n.id === "factory-reports" ? NAV_ITEMS.find((n2) => n2.id === "operations")! : n))
+    : items;
 
   return (
     <nav className="md:hidden sticky bottom-0 z-30 bg-[color:var(--sidebar)] safe-bottom shadow-[0_-2px_10px_rgba(1,32,94,0.25)]">
       <div className="grid grid-cols-5 px-1 pt-1.5 pb-1">
-        {items.map((item) => {
+        {finalItems.map((item) => {
           const Icon = item.icon;
           const active = activeSection === item.id;
           return (

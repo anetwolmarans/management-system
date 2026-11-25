@@ -6,11 +6,12 @@ import { NAV_ITEMS } from "@/lib/nav";
 import { cn } from "@/lib/utils";
 import { BrandLogo } from "@/components/brand-logo";
 
-export function MobileNav() {
+export function MobileNav({ role }: { role?: string }) {
   const open = useAppStore((s) => s.mobileNavOpen);
   const setOpen = useAppStore((s) => s.setMobileNavOpen);
   const activeSection = useAppStore((s) => s.activeSection);
   const setActiveSection = useAppStore((s) => s.setActiveSection);
+  const items = NAV_ITEMS.filter((n) => !n.roles || (role && n.roles.includes(role)));
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
@@ -27,7 +28,7 @@ export function MobileNav() {
           </SheetTitle>
         </SheetHeader>
         <nav className="py-3 px-2 space-y-1 overflow-y-auto">
-          {NAV_ITEMS.map((item) => {
+          {items.map((item) => {
             const Icon = item.icon;
             const active = activeSection === item.id;
             return (
