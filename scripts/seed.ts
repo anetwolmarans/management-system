@@ -146,6 +146,27 @@ async function main() {
     });
   }
 
+  // Current approved leave for the on-leave employee (James O'Brien, MS-1012)
+  // so the Employees view shows leave dates + a "Return from leave" action.
+  const onLeaveEmp = createdEmployees[11];
+  if (onLeaveEmp) {
+    const leaveStart = new Date(today);
+    leaveStart.setDate(today.getDate() - 2);
+    const leaveEnd = new Date(today);
+    leaveEnd.setDate(today.getDate() + 3);
+    await db.leaveRequest.create({
+      data: {
+        employeeId: onLeaveEmp.id,
+        type: "sick",
+        startDate: leaveStart,
+        endDate: leaveEnd,
+        days: 6,
+        reason: "Flu — doctor's note provided",
+        status: "approved",
+      },
+    });
+  }
+
   // ---------- Complaints ----------
   const complaintTemplates = [
     { title: "Late salary deposit", category: "payment", priority: "high", description: "Salary for last month arrived 5 days late, causing financial strain." },

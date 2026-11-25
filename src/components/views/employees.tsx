@@ -12,9 +12,18 @@ import {
   Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger,
 } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Plus, Search, Users, Trash2, Pencil, Mail, Phone, Briefcase, Upload } from "lucide-react";
+import { Plus, Search, Users, Trash2, Pencil, Mail, Phone, Briefcase, Upload, RotateCcw } from "lucide-react";
 import { toast } from "sonner";
 import { BulkUploadDialog, type BulkColumn } from "@/components/bulk-upload-dialog";
+
+interface LeaveInfo {
+  id: string;
+  type: string;
+  startDate: string;
+  endDate: string;
+  days: number;
+  status: string;
+}
 
 interface Employee {
   id: string;
@@ -28,6 +37,7 @@ interface Employee {
   salary: number;
   status: string;
   role: string;
+  leaves?: LeaveInfo[];
 }
 
 const DEPARTMENTS = ["Operations", "Sales", "Logistics", "HR", "Finance", "Engineering"];
@@ -125,6 +135,21 @@ export function EmployeesView() {
     }
   };
 
+  const returnFromLeave = async (id: string, name: string) => {
+    if (!confirm(`Mark ${name} as returned from leave? Their status will be set back to active.`)) return;
+    const r = await fetch(`/api/employees/${id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ status: "active" }),
+    });
+    if (r.ok) {
+      toast.success(`${name} marked as active`);
+      load();
+    } else {
+      toast.error("Could not update status");
+    }
+  };
+
   return (
     <div className="space-y-4">
       <SectionHeader
@@ -218,9 +243,21 @@ export function EmployeesView() {
                         <TableCell>{e.department}</TableCell>
                         <TableCell>{new Date(e.hireDate).toLocaleDateString()}</TableCell>
                         <TableCell>${e.salary.toLocaleString()}/mo</TableCell>
-                        <TableCell><StatusBadge status={e.status} /></TableCell>
+                        <TableCell>
+                          <StatusBadge status={e.status} />
+                          {e.status === "on-leave" && e.leaves?.[0] && (
+                            <div className="text-[11px] text-muted-foreground mt-0.5 whitespace-nowrap">
+                              {new Date(e.leaves[0].startDate).toLocaleDateString([], { month: "short", day: "numeric" })} — {new Date(e.leaves[0].endDate).toLocaleDateString([], { month: "short", day: "numeric" })}
+                            </div>
+                          )}
+                        </TableCell>
                         <TableCell className="text-right">
                           <div className="flex items-center justify-end gap-1">
+                            {e.status === "on-leave" && (
+                              <Button variant="ghost" size="icon" onClick={() => returnFromLeave(e.id, e.name)} className="h-8 w-8 text-emerald-600" title="Return from leave">
+                                <RotateCcw className="h-3.5 w-3.5" />
+                              </Button>
+                            )}
                             <Button variant="ghost" size="icon" onClick={() => openEdit(e)} className="h-8 w-8">
                               <Pencil className="h-3.5 w-3.5" />
                             </Button>
@@ -250,7 +287,14 @@ export function EmployeesView() {
                           <p className="font-medium truncate">{e.name}</p>
                           <p className="text-xs text-muted-foreground truncate">{e.position} · {e.department}</p>
                         </div>
-                        <StatusBadge status={e.status} />
+                        <div className="flex flex-col items-end gap-0.5">
+                          <StatusBadge status={e.status} />
+                          {e.status === "on-leave" && e.leaves?.[0] && (
+                            <span className="text-[10px] text-muted-foreground whitespace-nowrap">
+                              {new Date(e.leaves[0].startDate).toLocaleDateString([], { month: "short", day: "numeric" })} — {new Date(e.leaves[0].endDate).toLocaleDateString([], { month: "short", day: "numeric" })}
+                            </span>
+                          )}
+                        </div>
                       </div>
                       <div className="flex items-center gap-3 mt-2 text-xs text-muted-foreground">
                         <span className="flex items-center gap-1 truncate"><Mail className="h-3 w-3" /> {e.email}</span>
@@ -260,6 +304,11 @@ export function EmployeesView() {
                         <span className="flex items-center gap-1"><Briefcase className="h-3 w-3" /> ${e.salary.toLocaleString()}/mo</span>
                       </div>
                       <div className="flex gap-2 mt-2">
+                        {e.status === "on-leave" && (
+                          <Button size="sm" variant="outline" className="text-emerald-600 border-emerald-500/40" onClick={() => returnFromLeave(e.id, e.name)}>
+                            <RotateCcw className="h-3 w-3 mr-1" /> Return from leave
+                          </Button>
+                        )}
                         <Button size="sm" variant="outline" onClick={() => openEdit(e)}>
                           <Pencil className="h-3 w-3 mr-1" /> Edit
                         </Button>

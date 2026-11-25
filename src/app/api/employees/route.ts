@@ -23,8 +23,20 @@ export async function GET(req: Request) {
   const employees = await db.employee.findMany({
     where,
     orderBy: { createdAt: "desc" },
+    include: { leaves: true },
   });
-  return json(employees);
+  // Attach the current/upcoming approved leave (if any) to each employee
+  // so the Employees view can show leave dates + a "Return from leave" action.
+  const now = new Date();
+  return json(
+    employees.map((e) => ({
+      ...e,
+      leaves: e.leaves
+        .filter((l) => l.status === "approved" && new Date(l.endDate) >= now)
+        .sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime())
+        .slice(0, 1),
+    })),
+  );
 }
 
 export async function POST(req: Request) {
