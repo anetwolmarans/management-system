@@ -53,7 +53,7 @@ export function EmployeesView() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [bulkOpen, setBulkOpen] = useState(false);
   const [editing, setEditing] = useState<Employee | null>(null);
-  const [form, setForm] = useState<Partial<Employee>>({});
+  const [form, setForm] = useState<Partial<Employee> & { pin?: string }>({});
 
   const load = useCallback(() => {
     setLoading(true);
@@ -75,7 +75,7 @@ export function EmployeesView() {
 
   const openAdd = () => {
     setEditing(null);
-    setForm({ status: "active", department: "Operations", position: "", salary: 3000, hireDate: new Date().toISOString().slice(0, 10) });
+    setForm({ status: "active", department: "Operations", position: "", salary: 3000, hireDate: new Date().toISOString().slice(0, 10), pin: "" });
     setDialogOpen(true);
   };
 
@@ -84,6 +84,7 @@ export function EmployeesView() {
     setForm({
       ...emp,
       hireDate: new Date(emp.hireDate).toISOString().slice(0, 10),
+      pin: "", // blank = unchanged on edit
     });
     setDialogOpen(true);
   };
@@ -313,6 +314,17 @@ export function EmployeesView() {
             <div className="space-y-1.5">
               <Label>Salary (monthly)</Label>
               <Input type="number" value={form.salary ?? 0} onChange={(e) => setForm({ ...form, salary: Number(e.target.value) })} />
+            </div>
+            <div className="space-y-1.5">
+              <Label>Portal PIN</Label>
+              <Input
+                inputMode="numeric"
+                maxLength={8}
+                placeholder={editing ? "Enter new PIN to reset (blank = unchanged)" : "e.g. 1234 (defaults to 0000)"}
+                value={form.pin ?? ""}
+                onChange={(e) => setForm({ ...form, pin: e.target.value })}
+              />
+              <p className="text-[10px] text-muted-foreground">The PIN the employee uses to sign in at /portal. Tell them in person.</p>
             </div>
             <div className="space-y-1.5 sm:col-span-2">
               <Label>Status</Label>

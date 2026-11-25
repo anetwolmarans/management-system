@@ -1,5 +1,6 @@
 import { db } from "@/lib/db";
 import { json, err, parseBody } from "@/lib/api";
+import { hashPin } from "@/lib/pin-hash";
 
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
@@ -50,6 +51,8 @@ export async function POST(req: Request) {
         salary: Number(body.salary ?? 0),
         status: (body.status as string) ?? "active",
         avatar: (body.avatar as string) ?? null,
+        // Admin-assigned portal PIN — hashed before storage.
+        pin: hashPin(String(body.pin ?? "0000").trim() || "0000"),
       },
     });
     return json(emp, 201);

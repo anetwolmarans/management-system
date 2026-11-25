@@ -1,5 +1,6 @@
 import { db } from "@/lib/db";
 import { json, err, parseBody } from "@/lib/api";
+import { hashPin } from "@/lib/pin-hash";
 
 export async function GET(_req: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -26,6 +27,10 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
   }
   if (body.hireDate) data.hireDate = new Date(body.hireDate as string);
   if (body.salary !== undefined) data.salary = Number(body.salary);
+  // Admin can reset the portal PIN — hash before storing. Blank = unchanged.
+  if (body.pin !== undefined && String(body.pin).trim() !== "") {
+    data.pin = hashPin(String(body.pin).trim());
+  }
   try {
     const updated = await db.employee.update({ where: { id }, data });
     return json(updated);

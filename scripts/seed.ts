@@ -52,8 +52,9 @@ async function main() {
         salary: e.salary,
         status: i === 11 ? "on-leave" : "active",
         avatar: null,
-        // Default portal PIN = last 4 digits of the employee number (e.g. MS-1002 → 1002)
-        pin: hashPin(String(1001 + i).slice(-4)),
+        // Admin-assigned portal PIN (hashed). Marcus (MS-1002) gets "1002"
+        // for the demo; all others default to "0000" — admin sets real PINs.
+        pin: hashPin(i === 1 ? "1002" : "0000"),
       },
     });
     createdEmployees.push(emp);

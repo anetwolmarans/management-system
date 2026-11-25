@@ -1,10 +1,7 @@
-// Employee-app portal login — employee number, phone, or email + PIN.
-// Accepts several identifier forms for easier sign-in:
-//   • Full employee number:  "MS-1002"
-//   • Short numeric code:    "1002"        (matches any "*-1002")
-//   • Phone number:          "+1 555 0102" (normalized digit comparison)
-//   • Email:                 "name@company.com"
-// Creates a server-side session and returns a bearer token.
+// Employee-app portal login — employee number + admin-assigned PIN.
+// Accepts the full employee number ("MS-1002") or the short numeric
+// code ("1002"). The PIN is set by the admin in the Employees view —
+// it is NOT derived from the employee number.
 //
 // Security:
 //   • PINs are verified against a scrypt hash (with progressive upgrade
@@ -24,7 +21,7 @@ export async function POST(req: Request) {
   const identifier = String(body.identifier ?? "").trim();
   const pin = String(body.pin ?? "").trim();
 
-  if (!identifier || !pin) return err("Enter your employee number, phone, or email and your PIN.", 422);
+  if (!identifier || !pin) return err("Enter your employee number and PIN.", 422);
 
   // Rate limit BEFORE touching the DB — prevents brute-force enumeration.
   const limit = checkRateLimit(identifier);
@@ -36,39 +33,18 @@ export async function POST(req: Request) {
     );
   }
 
-  // Build lookup conditions from whatever the user typed.
+  // Lookup by employee number — full ("MS-1002") or short numeric ("1002").
   const isAllDigits = /^\d+$/.test(identifier);
-  const orConditions = [
-    { employeeNo: identifier.toUpperCase() },
-    { email: identifier.toLowerCase() },
-    { phone: identifier },
-  ];
-  // Short numeric code: "1002" matches employeeNo ending in "-1002".
+  const orConditions = [{ employeeNo: identifier.toUpperCase() }];
   if (isAllDigits) {
     orConditions.push({ employeeNo: { endsWith: `-${identifier}` } });
   }
 
-  let employee = await db.employee.findFirst({ where: { OR: orConditions } });
-
-  // Fallback: normalized phone comparison (strip non-digits from both sides)
-  // so "+1 555 0102", "5550102", "(+1) 555-0102" all match.
-  if (!employee) {
-    const digitsOnly = identifier.replace(/[^0-9]/g, "");
-    if (digitsOnly.length >= 7) {
-      const candidates = await db.employee.findMany({
-        where: { phone: { not: null } },
-      });
-      employee =
-        candidates.find((e) => {
-          const normalized = (e.phone ?? "").replace(/[^0-9]/g, "");
-          return normalized !== "" && normalized === digitsOnly;
-        }) ?? null;
-    }
-  }
+  const employee = await db.employee.findFirst({ where: { OR: orConditions } });
 
   // Same error message for "no such employee" and "wrong PIN" so an
   // attacker can't distinguish the two (no user enumeration).
-  const GENERIC = "Invalid credentials. Check your employee number and PIN.";
+  const GENERIC = "Invalid employee number or PIN.";
 
   if (!employee || !verifyPin(pin, employee.pin)) {
     recordFailure(identifier);
